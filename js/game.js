@@ -129,12 +129,14 @@ let initGame = (slot, gameContinued) => {
 	}
 
 	class Spell {
-		constructor(x,y,dir) {
+		constructor(x,y,dir,asset,power) {
 			this.x = x;
 			this.y = y;
 			this.originX = x;
 			this.originY = y;
 			this.dir = dir;
+			this.asset = asset;
+			this.power = power;
 			this.range = 400;
 			this.speed = 5;
 			this.currentFrame = 0;
@@ -182,7 +184,20 @@ let initGame = (slot, gameContinued) => {
 		}
 
 		draw() {
-			g.drawImage(assets['skills'],this.currentFrame*32,0,tileSize,tileSize,this.x-offsetX,this.y-offsetY,tileSize,tileSize);
+			g.save();
+			g.translate(this.x-offsetX+tileSize/2,this.y-offsetY+tileSize/2);
+			let angle;
+			if(this.dir == 1) angle = Math.PI*0.75;
+			else if(this.dir == 2) angle = Math.PI/2;
+			else if(this.dir == 3) angle = Math.PI/4;
+			else if(this.dir == 4) angle = Math.PI;
+			else if(this.dir == 6) angle = 0;
+			else if(this.dir == 7) angle = -Math.PI*0.75;
+			else if(this.dir == 8) angle = -Math.PI/2;
+			else if(this.dir == 9) angle = -Math.PI/4;
+			g.rotate(angle);
+			g.drawImage(assets[this.asset],this.currentFrame*32,0,tileSize,tileSize,-tileSize/2,-tileSize/2,tileSize,tileSize);
+			g.restore();
 		}
 	}
 
@@ -236,8 +251,13 @@ let initGame = (slot, gameContinued) => {
 			this.village = slot == 1 ? villages[localStorage.slot1Village] : villages[localStorage.slot2Village];
 
 			this.activities = {
-				fireball: new Act(10, () => {
-					spells.push(new Spell(this.x,this.y,this.dir));
+				fireball: new Act(200*this.castSpeed, () => {
+					spells.push(new Spell(this.x,this.y,this.dir,'fireball',this.mp));
+					this.mpXp += 5;
+					this.mana -= 10;
+				}),
+				stonethrow: new Act(200*this.castSpeed, () => {
+					spells.push(new Spell(this.x,this.y,this.dir,'stone',this.mp));
 					this.mpXp += 5;
 					this.mana -= 10;
 				}),
@@ -365,8 +385,10 @@ let initGame = (slot, gameContinued) => {
 			if(this.y%32 == 0) this.vy = 0;
 
 			if(this.vx || this.vy) this.moving = true;
-			else this.moving = false;
-
+			else {
+				this.moving = false;
+				this.currentFrame = 0;
+			}
 			offsetX = localPlayer.x - halfOfTileCount*tileSize;
 			offsetY = localPlayer.y - halfOfTileCount*tileSize;
 		}
@@ -388,6 +410,9 @@ let initGame = (slot, gameContinued) => {
 				}
 				else if(keys.f && this.mana >= 10) {
 					this.activities.fireball.use();
+				}
+				else if(keys.s && this.mana >= 10) {
+					this.activities.stonethrow.use();
 				}
 			}
 		}

@@ -136,7 +136,8 @@ let c = document.createElement('canvas'),
         addAsset('gameScreen', 'assets/ui/gameScreen.png');
         addAsset('tiles', 'assets/tiles/tiles.png');
         addAsset('items', 'assets/items/items.png');
-        addAsset('skills', 'assets/skills/skills.png');
+        addAsset('fireball', 'assets/skills/fireball.png');
+        addAsset('stone', 'assets/skills/stone.png');
 
         // entities
         addAsset('chicken', 'assets/mobs/chicken.png');
@@ -246,10 +247,56 @@ let c = document.createElement('canvas'),
             keys.down = true;
         if(e.keyCode == 65)
             keys.a = true;
+        if(e.keyCode == 66)
+            keys.b = true;
+        if(e.keyCode == 67)
+            keys.c = true;
         if(e.keyCode == 68)
             keys.d = true;
+        if(e.keyCode == 69)
+            keys.e = true;
         if(e.keyCode == 70)
             keys.f = true;
+        if(e.keyCode == 71)
+            keys.g = true;
+        if(e.keyCode == 72)
+            keys.h = true;
+        if(e.keyCode == 73)
+            keys.i = true;
+        if(e.keyCode == 74)
+            keys.j = true;
+        if(e.keyCode == 75)
+            keys.k = true;
+        if(e.keyCode == 76)
+            keys.l = true;
+        if(e.keyCode == 77)
+            keys.m = true;
+        if(e.keyCode == 78)
+            keys.n = true;
+        if(e.keyCode == 79)
+            keys.o = true;
+        if(e.keyCode == 80)
+            keys.p = true;
+        if(e.keyCode == 81)
+            keys.q = true;
+        if(e.keyCode == 82)
+            keys.r = true;
+        if(e.keyCode == 83)
+            keys.s = true;
+        if(e.keyCode == 84)
+            keys.t = true;
+        if(e.keyCode == 85)
+            keys.u = true;
+        if(e.keyCode == 86)
+            keys.v = true;
+        if(e.keyCode == 87)
+            keys.w = true;
+        if(e.keyCode == 88)
+            keys.x = true;
+        if(e.keyCode == 89)
+            keys.y = true;
+        if(e.keyCode == 90)
+            keys.z = true;
         // else
         //     console.log(e.keyCode);
     },
@@ -264,10 +311,56 @@ let c = document.createElement('canvas'),
             keys.down = false;
         if(e.keyCode == 65)
             keys.a = false;
+        if(e.keyCode == 66)
+            keys.b = false;
+        if(e.keyCode == 67)
+            keys.c = false;
         if(e.keyCode == 68)
             keys.d = false;
+        if(e.keyCode == 69)
+            keys.e = false;
         if(e.keyCode == 70)
             keys.f = false;
+        if(e.keyCode == 71)
+            keys.g = false;
+        if(e.keyCode == 72)
+            keys.h = false;
+        if(e.keyCode == 73)
+            keys.i = false;
+        if(e.keyCode == 74)
+            keys.j = false;
+        if(e.keyCode == 75)
+            keys.k = false;
+        if(e.keyCode == 76)
+            keys.l = false;
+        if(e.keyCode == 77)
+            keys.m = false;
+        if(e.keyCode == 78)
+            keys.n = false;
+        if(e.keyCode == 79)
+            keys.o = false;
+        if(e.keyCode == 80)
+            keys.p = false;
+        if(e.keyCode == 81)
+            keys.q = false;
+        if(e.keyCode == 82)
+            keys.r = false;
+        if(e.keyCode == 83)
+            keys.s = false;
+        if(e.keyCode == 84)
+            keys.t = false;
+        if(e.keyCode == 85)
+            keys.u = false;
+        if(e.keyCode == 86)
+            keys.v = false;
+        if(e.keyCode == 87)
+            keys.w = false;
+        if(e.keyCode == 88)
+            keys.x = false;
+        if(e.keyCode == 89)
+            keys.y = false;
+        if(e.keyCode == 90)
+            keys.z = false;
     },
     clickCallback = (e) => {
         let canvasX = Math.round((e.clientX - marginLeft) * (frame.width/c.width)),
