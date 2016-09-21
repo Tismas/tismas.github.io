@@ -2,23 +2,25 @@ let initGame = (slot, gameContinued) => {
 
 	class flowingText {
 		constructor(text,x,y) {
+			g.font = "15px Monospace";
+
 			this.text = text;
 			this.width = g.measureText(text).width;
-			this.x = halfOfTileCount*tileSize + (x - localPlayer.x) + (tileSize/2 - this.width/2);
-			this.y = halfOfTileCount*tileSize + (y - localPlayer.y) + 5;
+			this.x = x + tileSize/2 - this.width/2;
+			this.y = y + 5;
 			this.alpha = 1.0;
 		}
 
 		draw() {
 			g.fillStyle = "rgba(255,255,255," + this.alpha + ")";
 			g.font = "15px Monospace";
-			g.fillText(this.text,this.x,this.y);
+			g.fillText(this.text,this.x - offsetX,this.y - offsetY);
 			if(this.alpha == 0) flowingTexts.split(flowingTexts.indexOf(this),1);
 		}
 
 		update() {
 			this.y -= .5;
-			this.alpha -= 0.05;
+			this.alpha -= 0.04;
 		}
 	}
 
@@ -49,6 +51,7 @@ let initGame = (slot, gameContinued) => {
 		}
 
 		draw() {
+			if(this.dead) return;
 			let x = this.x - offsetX,
 				y = this.y - offsetY;
 			if(x>-tileSize && y>-tileSize && x<screenSize+tileSize && y<screenSize+tileSize)
@@ -56,7 +59,7 @@ let initGame = (slot, gameContinued) => {
 		}
 
 		update() {
-
+			if(this.dead) return;
 		}
 
 		getTile() {
@@ -64,6 +67,7 @@ let initGame = (slot, gameContinued) => {
 					y: Math.round(this.y/32)};
 		}
 	}
+
 	class Chicken extends Mob {
 		constructor(x,y) {
 			super(x,y,chickenID,assets['chicken'],1);
@@ -71,7 +75,7 @@ let initGame = (slot, gameContinued) => {
 		}
 
 		deathCheck() {
-			if(this.hp <= 0) {
+			if(!this.dead && this.hp <= 0) {
 				this.dead = true;
 				let t = this.getTile();
 				items.push(new Item(t.x,t.y,featherID));
@@ -124,42 +128,121 @@ let initGame = (slot, gameContinued) => {
 		}
 	}
 
+	class Spell {
+		constructor(x,y,dir) {
+			this.x = x;
+			this.y = y;
+			this.originX = x;
+			this.originY = y;
+			this.dir = dir;
+			this.range = 400;
+			this.speed = 5;
+			this.currentFrame = 0;
+		}
+
+		update() {
+			if(timer%5 == 0) {
+				this.currentFrame++;
+				if(this.currentFrame == 4) this.currentFrame = 0;
+			}
+			if(this.dir == 1) {
+				this.y+=this.speed;
+				this.x-=this.speed;
+			}
+			else if(this.dir == 3) {
+				this.y+=this.speed;
+				this.x+=this.speed;
+			}
+			else if(this.dir == 7) {
+				this.y-=this.speed;
+				this.x-=this.speed;
+			}
+			else if(this.dir == 9) {
+				this.y-=this.speed;
+				this.x+=this.speed;
+			}
+			else if(this.dir == 2) {
+				this.y+=this.speed;
+			}
+			else if(this.dir == 8) {
+				this.y-=this.speed;
+			}
+			else if(this.dir == 4) {
+				this.x-=this.speed;
+			}
+			else if(this.dir == 6) {
+				this.x+=this.speed;
+			}
+
+			let deltaX = Math.abs(this.x-this.originX),
+				deltaY = Math.abs(this.y-this.originY);
+			if(Math.sqrt(deltaX*deltaX+deltaY*deltaY) > this.range) {
+				spells.splice(spells.indexOf(this),1);
+			}
+		}
+
+		draw() {
+			g.drawImage(assets['skills'],this.currentFrame*32,0,tileSize,tileSize,this.x-offsetX,this.y-offsetY,tileSize,tileSize);
+		}
+	}
+
 	class Player {
 		constructor(x,y) {
 			this.inventory = [];
 			this.x = x * tileSize;
 			this.y = y * tileSize;
+			
 			this.maxHealth = 100;
 			this.health = this.maxHealth;
+			this.healthXp = 0;
+			this.healthXpNeeded = 25;
 			this.maxMana = 100;
 			this.mana = this.maxMana;
+			this.manaXp = 0;
+			this.manaXpNeeded = 25;
 			this.maxStamina = 1000;
 			this.stamina = this.maxStamina;
 			this.stamXpNeeded = 25;
 			this.stamXp = 0;
+			
 			this.moveSpeed = 1;
 			this.castSpeed = 2.5;
+			this.spellsCasted = 0;
 			this.reflex = 1;
+			this.reflexXp = 0;
+			this.reflexXpNeeded = 25;
 			this.strength = 10;
 			this.strXpNeeded = 25;
 			this.strXp = 0;
 			this.mp = 10;
+			this.mpXp = 0;
+			this.mpXpNeeded = 25;
 			this.im = 10;
+			this.imXp = 0;
+			this.imXpNeeded = 25;
+
 			this.dir = 2;
 			this.currentFrame = 0;
 			this.vx = 0;
 			this.vy = 0;
 			this.moving = false;
+			this.anotherLeg = true;
 			this.attacking = false;
 			this.resting = false;
+			this.onWater = false;
+
 			this.name = slot == 1 ? localStorage.slot1Name : localStorage.slot2Name;
 			this.class = slot == 1 ? classes[localStorage.slot1Class] : classes[localStorage.slot2Class];
 			this.village = slot == 1 ? villages[localStorage.slot1Village] : villages[localStorage.slot2Village];
 
 			this.activities = {
-				punch: new Act(40, (target)=>{ 
+				fireball: new Act(10, () => {
+					spells.push(new Spell(this.x,this.y,this.dir));
+					this.mpXp += 5;
+					this.mana -= 10;
+				}),
+				punch: new Act(40, (target) => { 
 					this.attacking = true;
-					this.currentFrame = 7;
 					if(target.type == treeStumpID) {
 						this.stamina -= Math.floor(this.strength * (0.4 + Math.random() * 0.4));
 						this.strXp += 5;
@@ -177,7 +260,6 @@ let initGame = (slot, gameContinued) => {
 						this.resting = false;
 					else {
 						this.resting = true;
-						this.currentFrame = 18;
 					}
 				})
 			}
@@ -210,133 +292,65 @@ let initGame = (slot, gameContinued) => {
 		}
 		handleMovement() {
 			let playerTile = this.getTile();
-			if(!(this.x%32) && !(this.y%32)) {
-				if(keys.down && keys.left) {
-					this.dir = 1;
-					let entityBlocking = false;
-					for(let i=0;i<mobs.length;i++) {
-						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x - 1 == mobTile.x && playerTile.y + 1 == mobTile.y) {
-							entityBlocking = true;
-							break;
-						}
-					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y+1)*mapWidth+playerTile.x-1]) {	
+			if(this.stamina > 0) {
+				if(!(this.x%32) && !(this.y%32)) {
+					if(keys.down && keys.left) {
+						this.dir = 1;
 						this.vx = -this.moveSpeed;
 						this.vy = this.moveSpeed;
 					}
-				}
-				else if(keys.down && keys.right) {
-					this.dir = 3;
-					let entityBlocking = false;
-					for(let i=0;i<mobs.length;i++) {
-						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x + 1 == mobTile.x && playerTile.y + 1 == mobTile.y) {
-							entityBlocking = true;
-							break;
-						}
-					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y+1)*mapWidth+playerTile.x+1]) {	
+					else if(keys.down && keys.right) {
+						this.dir = 3;
 						this.vx = this.moveSpeed;
 						this.vy = this.moveSpeed;
 					}
-				}
-				else if(keys.up && keys.left) {
-					this.dir = 7;
-					let entityBlocking = false;
-					for(let i=0;i<mobs.length;i++) {
-						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x - 1 == mobTile.x && playerTile.y - 1 == mobTile.y) {
-							entityBlocking = true;
-							break;
-						}
-					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y-1)*mapWidth+playerTile.x-1]) {	
+					else if(keys.up && keys.left) {
+						this.dir = 7;
 						this.vx = -this.moveSpeed;
 						this.vy = -this.moveSpeed;
 					}
-				}
-				else if(keys.up && keys.right) {
-					this.dir = 9;
-					let entityBlocking = false;
-					for(let i=0;i<mobs.length;i++) {
-						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x + 1 == mobTile.x && playerTile.y - 1 == mobTile.y) {
-							entityBlocking = true;
-							break;
-						}
-					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y-1)*mapWidth+playerTile.x+1]) {	
+					else if(keys.up && keys.right) {
+						this.dir = 9;
 						this.vx = this.moveSpeed;
 						this.vy = -this.moveSpeed;
 					}
-				}
-				else if(keys.down) {
-					this.dir = 2;
-					let entityBlocking = false;
-					for(let i=0;i<mobs.length;i++) {
-						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x == mobTile.x && playerTile.y + 1 == mobTile.y) {
-							entityBlocking = true;
-							break;
-						}
-					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y+1)*mapWidth+playerTile.x]) {
+					else if(keys.down) {
+						this.dir = 2;
 						this.vy = this.moveSpeed;
 					}
-				}
-				else if(keys.left) {
-					this.dir = 4;
-					let entityBlocking = false;
-					for(let i=0;i<mobs.length;i++) {
-						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x - 1 == mobTile.x && playerTile.y == mobTile.y) {
-							entityBlocking = true;
-							break;
-						}
-					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y)*mapWidth+playerTile.x-1]) {
+					else if(keys.left) {
+						this.dir = 4;
 						this.vx = -this.moveSpeed;
 					}
-				}
-				else if(keys.right) {
-					this.dir = 6;
-					let entityBlocking = false;
-					for(let i=0;i<mobs.length;i++) {
-						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x + 1 == mobTile.x && playerTile.y == mobTile.y) {
-							entityBlocking = true;
-							break;
-						}
-					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y)*mapWidth+playerTile.x+1]) {
+					else if(keys.right) {
+						this.dir = 6;
 						this.vx = this.moveSpeed;
 					}
-				}
-				else if(keys.up) {
-					this.dir = 8;
+					else if(keys.up) {
+						this.dir = 8;
+						this.vy = -this.moveSpeed;
+					}
+
 					let entityBlocking = false;
 					for(let i=0;i<mobs.length;i++) {
 						let mobTile = mobs[i].getTile();
-						if(!mobs[i].dead && playerTile.x == mobTile.x && playerTile.y - 1 == mobTile.y) {
+						if(!mobs[i].dead && playerTile.x + (this.vx > 0) - (this.vx < 0) == mobTile.x && playerTile.y + (this.vy > 0) - (this.vy < 0) == mobTile.y) {
 							entityBlocking = true;
 							break;
 						}
 					}
-					if(!entityBlocking && !blockingLayer[(playerTile.y-1)*mapWidth+playerTile.x]) {
-						this.vy = -this.moveSpeed;
+					if(entityBlocking || blockingLayer[(playerTile.y + (this.vy > 0) - (this.vy < 0))*mapWidth+playerTile.x + (this.vx > 0) - (this.vx < 0)]) {	
+						this.vx = 0;
+						this.vy = 0;
 					}
 				}
 			}
 
-			if(this.stamina <= 0 && !(this.x%32) && !(this.y%32)) {
-				;
-			}
-			else if(groundLayer[playerTile.y*mapWidth+playerTile.x] == 34) {
+			if(Math.round(this.x) != this.x || Math.round(this.y) != this.y || groundLayer[playerTile.y*mapWidth+playerTile.x] == 34) {
 				this.x += this.vx/2;
 				this.y += this.vy/2;
 
-				if(this.vy < 0 && timer == 0) {
+				if(this.vy < 0 && timer % 60 == 0) {
 					this.stamXp+=2;
 					this.stamina -= Math.round(Nasos.rand(10,100));
 					if(this.stamina < 0) this.stamina = 0;
@@ -347,8 +361,8 @@ let initGame = (slot, gameContinued) => {
 				this.y += this.vy;
 			}
 
-			if(!(this.x%32)) this.vx = 0;
-			if(!(this.y%32)) this.vy = 0;
+			if(this.x%32 == 0) this.vx = 0;
+			if(this.y%32 == 0) this.vy = 0;
 
 			if(this.vx || this.vy) this.moving = true;
 			else this.moving = false;
@@ -364,7 +378,7 @@ let initGame = (slot, gameContinued) => {
 			else if(this.stamina > 1 && !this.resting) {
 				let target = null;
 				for(let i=0;i<mobs.length;i++) {
-					if(inFront(this.getTile(),this.dir,mobs[i].getTile())) {
+					if(!mobs[i].dead && inFront(this.getTile(),this.dir,mobs[i].getTile())) {
 						target = mobs[i];
 						break;
 					}
@@ -372,23 +386,97 @@ let initGame = (slot, gameContinued) => {
 				if(target && keys.a) {
 					this.activities.punch.use(target);
 				}
+				else if(keys.f && this.mana >= 10) {
+					this.activities.fireball.use();
+				}
 			}
 		}
 		checkStatChanges() {
-			if(this.strXp >= this.strXpNeeded) {
-				this.strength += 1 + Math.floor(Math.random()*10);
-				this.strXp -= this.strXpNeeded;
+			if(this.healthXp >= this.healthXpNeeded) {
+				this.maxHealth += 5 + Math.floor(Math.random()*20);
+				this.healthXp -= this.healthXpNeeded;
 			}
 			if(this.stamXp >= this.stamXpNeeded) {
-				this.maxStamina += 1 + Math.floor(Math.random()*50);
+				this.maxStamina += 5 + Math.floor(Math.random()*50);
 				this.stamXp -= this.stamXpNeeded;
+			}
+			if(this.manaXp >= this.manaXpNeeded) {
+				this.mana += 5 + Math.floor(Math.random()*30);
+				this.manaXp -= this.manaXpNeeded;
+			}
+			if(this.reflexXp >= this.reflexXpNeeded) {
+				this.reflex++;
+				this.reflexXp -= this.reflexXpNeeded;
+			}
+			if(this.strXp >= this.strXpNeeded) {
+				this.strength += 5 + Math.floor(Math.random()*10);
+				this.strXp -= this.strXpNeeded;
+			}
+			if(this.mpXp >= this.mpXpNeeded) {
+				this.mp += 5 + Math.floor(Math.random()*10);
+				this.mpXp -= this.mpXpNeeded;
+			}
+			if(this.imXp >= this.imXpNeeded) {
+				this.im += 5 + Math.floor(Math.random()*10);
+				this.imXp -= this.imXpNeeded;
+			}
+		}
+		handleStatusEffects() {
+			if(this.resting && timer % 60 == 0) {
+				if(this.health < this.maxHealth)
+					this.health += Math.round(this.maxHealth/12) + 50;
+				if(this.stamina < this.maxStamina)
+					this.stamina += Math.round(this.maxStamina/12) + 50;
+				if(this.mana < this.maxMana)
+					this.mana += Math.round(this.maxMana/12) + 50;
+				if(this.health > this.maxHealth) this.health = this.maxHealth;
+				if(this.mana > this.maxMana) this.mana = this.maxMana;
+				if(this.stamina > this.maxStamina) this.stamina = this.maxStamina;
+				if(this.health == this.maxHealth && this.mana == this.maxMana && this.stamina == this.maxStamina) {
+					this.currentFrame = 0;
+					this.resting = false;
+				}
+			}
+		}
+		updateFrames() {
+			if(this.resting) 
+				this.currentFrame = 18;
+			else if(this.stamina == 0)
+				this.currentFrame = 20;
+			else if(this.attacking) {
+				if(timer % 5 == 0) {
+					if(this.currentFrame < 7 || this.currentFrame > 10) {
+						this.currentFrame = 7;
+					}
+					else {
+						this.currentFrame++;
+					}
+					if(this.currentFrame == 10) {
+						this.attacking = false;
+						this.currentFrame = 7;
+					}
+				}
+			}
+			else if(this.moving) {
+				if(this.x % 32 == 5 || this.y % 32 == 5) this.anotherLeg = !this.anotherLeg;
+				if(this.x % 32 >= 8 && this.x%32 <= 24 || this.y % 32 >= 8 && this.y%32 <= 24) {
+					this.currentFrame = 4 + this.anotherLeg*2;
+				}
+				else this.currentFrame = 3;
+			}
+			else {
+				if(timer == 0) this.currentFrame = 0;
+				else if(timer == 60) this.currentFrame = 1;
+				else if(timer == 120) this.currentFrame = 2;
 			}
 		}
 		update() {
 			if(!localPlayer.resting)
 				this.handleMovement();
-			this.handleActivities(); // outside because of rest handling
+			this.handleActivities(); // outside of if statement because of rest handling
 			this.checkStatChanges();
+			this.updateFrames();
+			this.handleStatusEffects();
 
 			for(let key in this.activities) {
 				if(this.activities[key].cd > 0)
@@ -398,15 +486,15 @@ let initGame = (slot, gameContinued) => {
 	}
 
 	let	debugging = true,
+		framesThisSecond = 0,
+		fps = 0,
 
 		treeStumpID = 6,
 		chickenID = 101,
 		featherID = 0,
 		
 		frameRate = 60,
-		framesThisSecond = 0,
 		timer = 0,
-		fps = 60,
 		lastUpdate = (new Date()).getTime(),
 		canvasTileCount = 19,
 		halfOfTileCount = Math.floor(canvasTileCount/2),
@@ -426,6 +514,7 @@ let initGame = (slot, gameContinued) => {
 
 		mobs = [],
 		items = [],
+		spells = [],
 		flowingTexts = [],
 
 		debug = () => {
@@ -533,6 +622,54 @@ let initGame = (slot, gameContinued) => {
 			gameCanvas.width = screenSize;
 			gameCanvas.height = screenSize;
 		},
+	    contextMenuCallback = (e) => {
+       		e.preventDefault();
+            let ratioW = frame.width/c.width,
+                ratioH = frame.height/c.height,
+                canvasX = Math.round((e.clientX - marginLeft) * ratioW),
+                canvasY = Math.round((e.clientY - marginTop) * ratioH),
+                cx = 499, 
+                cy = 155, 
+                cs = 923;
+            contextMenu.x = (canvasX - cx) * (gameCanvas.width/cs);
+            contextMenu.y = (canvasY - cy) * (gameCanvas.height/cs);
+            if(contextMenu.x > 0 && contextMenu.x < gameCanvas.width && contextMenu.y > 0 && contextMenu.y < gameCanvas.height) {
+                let options = '',
+                	optionCount = 0;
+
+                for(let i=0;i<mobs.length;i++) {
+                	if(!mobs[i].dead && Nasos.collidePR(contextMenu,
+                			{x:mobs[i].x-offsetX,
+                			 y:mobs[i].y-offsetY,
+                			 width:tileSize,
+                			 height:tileSize}
+                	)) {
+                		optionCount++;
+                		options += `<li class='option'> ${mobs[i].name} </li>`;
+                	}
+                }
+                for(let i=0;i<items.length;i++) {
+                	if(Nasos.collidePR(contextMenu,
+                			{x:items[i].x-offsetX,
+                			 y:items[i].y-offsetY,
+                			 width:tileSize,
+                			 height:tileSize}
+                	)) {
+                		optionCount++;
+                		options += `<li class='option'> ${items[i].name} </li>`;
+                	}
+                }
+
+                if(optionCount > 0) {
+	                contextMenu.open = true;
+	                $('#custom-menu').css('display','block');
+	                $('#custom-menu').css('left', e.clientX + 'px');
+	                $('#custom-menu').css('top', e.clientY + 'px');
+	                $('#custom-menu').html(options);
+	            }
+            }
+	        return false;
+	    },
 		setupEntities = () => {
 			for(let i=0;i<mapHeight;i++) {
 				for(let j=0;j<mapWidth;j++) {
@@ -573,8 +710,8 @@ let initGame = (slot, gameContinued) => {
 							(index%tilesetColumns)*tileSize, 
 							Math.floor(index/tilesetColumns)*tileSize, 
 							tileSize, tileSize,
-							j*tileSize - localPlayer.x%32, 
-							i*tileSize - localPlayer.y%32, 
+							j*tileSize - Math.floor(localPlayer.x%32), 
+							i*tileSize - Math.floor(localPlayer.y%32), 
 							tileSize, tileSize);
 					}
 				}
@@ -584,11 +721,8 @@ let initGame = (slot, gameContinued) => {
 			localPlayer.draw();
 		},
 		drawTiles = () => {
-			for(let i=0;i<layers.length;i++) {
-				if(layers[i].visible)
-					if(layers[i].name != "Entities" && layers[i].name != "BlockingLayer")
-					drawLayer(layers[i].data);
-			}
+			drawLayer(layers[0].data);	// ground
+			drawLayer(layers[1].data);	// objects
 		},
 		displayStats = () => {
 			f.font = "20px Monospace";
@@ -621,39 +755,9 @@ let initGame = (slot, gameContinued) => {
 			for(let i=0;i<flowingTexts.length;i++)
 				flowingTexts[i].draw();
 		},
-		drawContextMenu = () => {
-			g.fillStyle = "#fff";
-			g.font = "12px Monospace";
-			let options = [],
-				widest = 0;
-			for(let i=0;i<mobs.length;i++) {
-				if(!mobs[i].dead && Nasos.collidePR(
-					{x:contextMenu.x, y:contextMenu.y},
-					{x:mobs[i].x - offsetX, y:mobs[i].y - offsetY, width:tileSize, height:tileSize})
-				) {
-					options.push(mobs[i]);
-					let w = g.measureText(mobs[i].name).width;
-					if(w > widest) widest = w;
-				}
-			}
-			for(let i=0;i<items.length;i++) {
-				if(Nasos.collidePR(
-					{x:contextMenu.x, y:contextMenu.y},
-					{x:items[i].x - offsetX, y:items[i].y - offsetY, width:tileSize, height:tileSize})
-				)
-					options.push(items[i]);
-					let w = g.measureText(items[i].name).width;
-					if(w > widest) widest = w;
-			}
-			for(let i=0;i<options.length;i++) {
-				let padding = 1,
-					w = widest + 20;
-				g.fillStyle = "#fff";
-				g.fillRect(contextMenu.x,contextMenu.y+i*20, w,20);
-				g.fillStyle = "#ccc";
-				g.fillRect(contextMenu.x + padding,contextMenu.y+padding+i*20,w-2*padding,20-2*padding);
-				g.fillStyle = "#000";
-				g.fillText(options[i].name,contextMenu.x + 10,contextMenu.y+i*20 + 13);
+		drawSpells = () => {
+			for(let i=0;i<spells.length;i++) {
+				spells[i].draw();
 			}
 		},
 		draw = () => {
@@ -661,10 +765,9 @@ let initGame = (slot, gameContinued) => {
 			drawTiles();
 			drawItems();
 			drawMobs();
+			drawSpells();
 			drawPlayers();
 			drawFlowingTexts();
-			if(contextMenu.open) 
-				drawContextMenu();
 		},
 
 		// ----------------------------------------------- UPDATING
@@ -682,54 +785,9 @@ let initGame = (slot, gameContinued) => {
 		updatePlayers = () => {
 			localPlayer.update();
 		},
-		updateFrames = () => {
-			if(timer%5 == 0) {
-				if(localPlayer.moving && timer%10 == 0 || !localPlayer.moving)
-					localPlayer.currentFrame++;
-				if(localPlayer.resting) {
-					if(timer == 30) {
-						if(localPlayer.health < localPlayer.maxHealth) {
-							localPlayer.health += Math.floor(localPlayer.maxHealth * (0.1 + Math.random() * 0.05));
-						}
-						if(localPlayer.health > localPlayer.maxHealth)
-							localPlayer.health = localPlayer.maxHealth;
-
-						if(localPlayer.stamina < localPlayer.maxStamina) {
-							localPlayer.stamina += Math.floor(localPlayer.maxStamina * (0.1 + Math.random() * 0.05));
-						}
-						if(localPlayer.stamina > localPlayer.maxStamina)
-							localPlayer.stamina = localPlayer.maxStamina;
-
-						if(localPlayer.mana < localPlayer.maxMana) {
-							localPlayer.mana += Math.floor(localPlayer.maxMana * (0.1 + Math.random() * 0.05));
-						}
-						if(localPlayer.mana > localPlayer.maxMana)
-							localPlayer.mana = localPlayer.maxMana;
-						
-						if(localPlayer.stamina == localPlayer.maxStamina && localPlayer.mana == localPlayer.maxMana && localPlayer.health == localPlayer.maxHealth)
-							localPlayer.resting = false;
-					}
-					localPlayer.currentFrame = 18;
-				}
-				else if(localPlayer.stamina == 0) {
-					localPlayer.currentFrame = 20;
-					localPlayer.dir = 2;
-				}
-				else if(localPlayer.attacking) {
-					if(localPlayer.currentFrame >= 11) {
-						localPlayer.currentFrame = 0;
-						localPlayer.attacking = false;
-					}
-				}
-				else if(localPlayer.moving) {
-					if(localPlayer.currentFrame >= 7 || localPlayer.currentFrame < 3) localPlayer.currentFrame = 3;
-				}
-				else if(localPlayer.swiming) {
-					if(localPlayer.currentFrame >= 18 || localPlayer.currentFrame < 13) localPlayer.currentFrame = 13;
-				}
-				else {
-					if(localPlayer.currentFrame >= 3) localPlayer.currentFrame = 0;
-				}
+		updateSpells = () => {
+			for(let i=0;i<spells.length;i++) {
+				spells[i].update();
 			}
 		},
 		update = () => {
@@ -738,11 +796,11 @@ let initGame = (slot, gameContinued) => {
 				if(debugging)
 					framesThisSecond++;
 				timer++;
-				if(timer == 60) timer = 0;
+				if(timer == 180) timer = 0;
 				updateMobs();
+				updateSpells();
 				updatePlayers();
 				updateTexts();
-				updateFrames();
 				if(timer == 30)
 					updateTexts();
 
@@ -760,12 +818,13 @@ let initGame = (slot, gameContinued) => {
 			requestAnimationFrame(loop);
 		};
 
+    c.oncontextmenu = contextMenuCallback;
 	setupGameCanvas();
 	setupEntities();
-	loop();
 	load();
 	if(localPlayer.x % 32 != 0) localPlayer.x = localPlayer.x - localPlayer.x % 32;
 	if(localPlayer.y % 32 != 0) localPlayer.y = localPlayer.y - localPlayer.y % 32;
+	loop();
 	save();
 	setInterval(save, 1000);
 	if(debugging)

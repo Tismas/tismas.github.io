@@ -43,12 +43,10 @@ let c = document.createElement('canvas'),
         window.onresize = resizeCallback;
         c.onclick = clickCallback;
         c.onmousemove = mouseMoveCallback;
-        c.oncontextmenu = contextMenuCallback;
 
         document.onkeydown = keydownCallback;
         document.onkeyup = keyupCallback;
 
-        keys.up = keys.down = keys.left = keys.right = false;
         Math.seedrandom(999);
 
         f.imageSmoothingEnabled = false;
@@ -138,6 +136,7 @@ let c = document.createElement('canvas'),
         addAsset('gameScreen', 'assets/ui/gameScreen.png');
         addAsset('tiles', 'assets/tiles/tiles.png');
         addAsset('items', 'assets/items/items.png');
+        addAsset('skills', 'assets/skills/skills.png');
 
         // entities
         addAsset('chicken', 'assets/mobs/chicken.png');
@@ -249,6 +248,8 @@ let c = document.createElement('canvas'),
             keys.a = true;
         if(e.keyCode == 68)
             keys.d = true;
+        if(e.keyCode == 70)
+            keys.f = true;
         // else
         //     console.log(e.keyCode);
     },
@@ -265,6 +266,8 @@ let c = document.createElement('canvas'),
             keys.a = false;
         if(e.keyCode == 68)
             keys.d = false;
+        if(e.keyCode == 70)
+            keys.f = false;
     },
     clickCallback = (e) => {
         let canvasX = Math.round((e.clientX - marginLeft) * (frame.width/c.width)),
@@ -278,16 +281,26 @@ let c = document.createElement('canvas'),
                 createCharacter(2);
             }
             else if(Nasos.collidePR(clickPoint, {x:240,y:370,width:130,height:40})) {
-                slotUsed = 1;
-                characterBase = localStorage.slot1Base;
-                hairStyle = localStorage.slot1Hair;
-                game(true);
+                if(localStorage.slot1Base) {
+                    slotUsed = 1;
+                    characterBase = localStorage.slot1Base;
+                    hairStyle = localStorage.slot1Hair;
+                    game(true);
+                }
+                else {
+                    alert("You don't have any character on the first slot.");
+                }
             }
             else if(Nasos.collidePR(clickPoint, {x:240,y:880,width:130,height:40})) {
-                slotUsed = 2;
-                characterBase = localStorage.slot2Base;
-                hairStyle = localStorage.slot2Hair;
-                game(true);
+                if(localStorage.slot2Base) {
+                    slotUsed = 2;
+                    characterBase = localStorage.slot2Base;
+                    hairStyle = localStorage.slot2Hair;
+                    game(true);
+                }
+                else {
+                    alert("You don't have any character on the second slot.");
+                }
             }
         }
         else if(currentScreen == 2) {
@@ -397,6 +410,12 @@ let c = document.createElement('canvas'),
                 }
             }
         }
+        else if(currentScreen == 3) {
+            if(contextMenu.open) {
+                contextMenu.open = false;
+                $('#custom-menu').css('display','none');
+            }
+        }
     },
     mouseMoveCallback = (e) => {
         let ratioW = frame.width/c.width,
@@ -445,30 +464,9 @@ let c = document.createElement('canvas'),
             else
                 c.style.cursor = 'auto';
         }
-        else {    
-            let rw2 = 1270/frame.width,
-                rh2 = 715/frame.height;
-            contextMenu.mouse.x = Math.round(((e.clientX - marginLeft) * ratioW - 499) * rw2);
-            contextMenu.mouse.y = Math.round(((e.clientY - marginTop) * ratioH - 155) * rh2);
-            if(contextMenu.open && Nasos.distanceBetween(contextMenu,contextMenu.mouse) > 100)
-                contextMenu.open = false;
+        else {
             c.style.cursor = 'auto';
         }
-    },
-    contextMenuCallback = (e) => {
-        e.preventDefault();
-        if(currentScreen == 3) {
-            let ratioW = frame.width/c.width,
-                ratioH = frame.height/c.height,
-                rw2 = 1270/frame.width,
-                rh2 = 715/frame.height;
-            contextMenu.x = Math.round(((e.clientX - marginLeft) * ratioW - 499) * rw2);
-            contextMenu.y = Math.round(((e.clientY - marginTop) * ratioH - 155) * rh2);
-            contextMenu.mouse.x = contextMenu.x;
-            contextMenu.mouse.y = contextMenu.y;
-            contextMenu.open = true;
-        }
-        return false;
     },
 
     // drawing
