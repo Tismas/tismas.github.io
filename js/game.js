@@ -385,10 +385,7 @@ let initGame = (slot, gameContinued) => {
 			if(this.y%32 == 0) this.vy = 0;
 
 			if(this.vx || this.vy) this.moving = true;
-			else {
-				this.moving = false;
-				this.currentFrame = 0;
-			}
+			else this.moving = false;
 			offsetX = localPlayer.x - halfOfTileCount*tileSize;
 			offsetY = localPlayer.y - halfOfTileCount*tileSize;
 		}
