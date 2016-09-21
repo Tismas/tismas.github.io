@@ -140,6 +140,39 @@ let initGame = (slot, gameContinued) => {
 			this.range = 400;
 			this.speed = 5;
 			this.currentFrame = 0;
+
+			if(this.dir == 1) {
+				this.vy=this.speed;
+				this.vx=-this.speed;
+			}
+			else if(this.dir == 3) {
+				this.vy=this.speed;
+				this.vx=this.speed;
+			}
+			else if(this.dir == 7) {
+				this.vy=-this.speed;
+				this.vx=-this.speed;
+			}
+			else if(this.dir == 9) {
+				this.vy=-this.speed;
+				this.vx=this.speed;
+			}
+			else if(this.dir == 2) {
+				this.vy=this.speed;
+				this.vx = 0;
+			}
+			else if(this.dir == 8) {
+				this.vy=-this.speed;
+				this.vx = 0;
+			}
+			else if(this.dir == 4) {
+				this.vx=-this.speed;
+				this.vy = 0;
+			}
+			else if(this.dir == 6) {
+				this.vx=this.speed;
+				this.vy = 0;
+			}
 		}
 
 		update() {
@@ -147,38 +180,27 @@ let initGame = (slot, gameContinued) => {
 				this.currentFrame++;
 				if(this.currentFrame == 4) this.currentFrame = 0;
 			}
-			if(this.dir == 1) {
-				this.y+=this.speed;
-				this.x-=this.speed;
+			this.x += this.vx;
+			this.y += this.vy;
+
+			let toDel = false;
+			for(let i=0;i<mobs.length;i++) {
+				if(!(mobs[i].dead) && Nasos.intersects({x:this.x,y:this.y,width:tileSize,height:tileSize},{x:mobs[i].x,y:mobs[i].y,width:tileSize,height:tileSize})) {
+					if(mobs[i].type != treeStumpID) {
+						mobs[i].hp -= this.power;
+						mobs[i].deathCheck();
+					}
+					flowingTexts.push(new flowingText(this.power,mobs[i].x,mobs[i].y));
+					toDel = true;
+					break;
+				}
 			}
-			else if(this.dir == 3) {
-				this.y+=this.speed;
-				this.x+=this.speed;
-			}
-			else if(this.dir == 7) {
-				this.y-=this.speed;
-				this.x-=this.speed;
-			}
-			else if(this.dir == 9) {
-				this.y-=this.speed;
-				this.x+=this.speed;
-			}
-			else if(this.dir == 2) {
-				this.y+=this.speed;
-			}
-			else if(this.dir == 8) {
-				this.y-=this.speed;
-			}
-			else if(this.dir == 4) {
-				this.x-=this.speed;
-			}
-			else if(this.dir == 6) {
-				this.x+=this.speed;
-			}
+			if(blockingLayer[(Math.floor(this.y/32) + (this.vy > 0) - (this.vy < 0))*mapWidth+Math.floor(this.x/32) + (this.vx > 0) - (this.vx < 0)])
+				toDel = true;
 
 			let deltaX = Math.abs(this.x-this.originX),
 				deltaY = Math.abs(this.y-this.originY);
-			if(Math.sqrt(deltaX*deltaX+deltaY*deltaY) > this.range) {
+			if(toDel || Math.sqrt(deltaX*deltaX+deltaY*deltaY) > this.range) {
 				spells.splice(spells.indexOf(this),1);
 			}
 		}
@@ -254,12 +276,35 @@ let initGame = (slot, gameContinued) => {
 				fireball: new Act(200*this.castSpeed, () => {
 					spells.push(new Spell(this.x,this.y,this.dir,'fireball',this.mp));
 					this.mpXp += 5;
+					this.manaXp += 3;
 					this.mana -= 10;
+					if(this.castSpeed > 1) {
+						if(Math.floor(Math.random()*100) == 1)
+							this.castSpeed -= 0.1;
+					}
+					this.setCooldownOnAll();
 				}),
-				stonethrow: new Act(200*this.castSpeed, () => {
+				waterBullets: new Act(200*this.castSpeed, () => {
+					spells.push(new Spell(this.x,this.y,this.dir,'water',this.mp));
+					this.mpXp += 5;
+					this.manaXp += 3;
+					this.mana -= 10;
+					if(this.castSpeed > 1) {
+						if(Math.floor(Math.random()*100) == 1)
+							this.castSpeed -= 0.1;
+					}
+					this.setCooldownOnAll();
+				}),
+				stoneThrow: new Act(200*this.castSpeed, () => {
 					spells.push(new Spell(this.x,this.y,this.dir,'stone',this.mp));
 					this.mpXp += 5;
+					this.manaXp += 3;
 					this.mana -= 10;
+					if(this.castSpeed > 1) {
+						if(Math.floor(Math.random()*100) == 1)
+							this.castSpeed -= 0.1;
+					}
+					this.setCooldownOnAll();
 				}),
 				punch: new Act(40, (target) => { 
 					this.attacking = true;
@@ -389,8 +434,15 @@ let initGame = (slot, gameContinued) => {
 			offsetX = localPlayer.x - halfOfTileCount*tileSize;
 			offsetY = localPlayer.y - halfOfTileCount*tileSize;
 		}
+		setCooldownOnAll() {
+			for(let key in this.activities) {
+				if(this.activities[key].cd < 60) {
+					this.activities[key].cd = 60;
+				}
+			}
+		}
 		handleActivities() {
-			if(keys.d) {
+			if(keys.d && (this.stamina < this.maxStamina || this.mana < this.maxMana || this.health < this.maxHealth)) {
 				if(this.stamina < 0) this.stamina = 0;
 				this.activities.rest.use();
 			}
@@ -409,7 +461,10 @@ let initGame = (slot, gameContinued) => {
 					this.activities.fireball.use();
 				}
 				else if(keys.s && this.mana >= 10) {
-					this.activities.stonethrow.use();
+					this.activities.stoneThrow.use();
+				}
+				else if(keys.w && this.mana >= 10) {
+					this.activities.waterBullets.use();
 				}
 			}
 		}
@@ -423,7 +478,7 @@ let initGame = (slot, gameContinued) => {
 				this.stamXp -= this.stamXpNeeded;
 			}
 			if(this.manaXp >= this.manaXpNeeded) {
-				this.mana += 5 + Math.floor(Math.random()*30);
+				this.maxMana += 5 + Math.floor(Math.random()*30);
 				this.manaXp -= this.manaXpNeeded;
 			}
 			if(this.reflexXp >= this.reflexXpNeeded) {
@@ -446,11 +501,11 @@ let initGame = (slot, gameContinued) => {
 		handleStatusEffects() {
 			if(this.resting && timer % 60 == 0) {
 				if(this.health < this.maxHealth)
-					this.health += Math.round(this.maxHealth/12) + 50;
+					this.health += Math.round(this.maxHealth/12) + 10;
 				if(this.stamina < this.maxStamina)
-					this.stamina += Math.round(this.maxStamina/12) + 50;
+					this.stamina += Math.round(this.maxStamina/12) + 10;
 				if(this.mana < this.maxMana)
-					this.mana += Math.round(this.maxMana/12) + 50;
+					this.mana += Math.round(this.maxMana/12) + 10;
 				if(this.health > this.maxHealth) this.health = this.maxHealth;
 				if(this.mana > this.maxMana) this.mana = this.maxMana;
 				if(this.stamina > this.maxStamina) this.stamina = this.maxStamina;
