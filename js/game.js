@@ -663,6 +663,7 @@ let initGame = (slot, gameContinued) => {
 				localStorage.slot1mp = localPlayer.mp;
 				localStorage.slot1im = localPlayer.im;
 				localStorage.slot1dir = localPlayer.dir;
+				localStorage.slot1Inventory = JSON.stringify(localPlayer.inventory);
 			}
 			if(currentSlot == 2) {
 				localStorage.slot2x = localPlayer.x;
@@ -680,6 +681,7 @@ let initGame = (slot, gameContinued) => {
 				localStorage.slot2mp = localPlayer.mp;
 				localStorage.slot2im = localPlayer.im;
 				localStorage.slot2dir = localPlayer.dir;
+				localStorage.slot2Inventory = JSON.stringify(localPlayer.inventory);
 			}
 		},
 		load = () => {
@@ -699,6 +701,7 @@ let initGame = (slot, gameContinued) => {
 				localPlayer.mp = Number(localStorage.slot1mp);
 				localPlayer.im = Number(localStorage.slot1im);
 				localPlayer.dir = Number(localStorage.slot1dir);
+				localPlayer.inventory = JSON.parse(localStorage.slot1Inventory);
 				localPlayer.currentFrame = 0;
 			}
 			else if(currentSlot == 2 && gameContinued) {
@@ -717,6 +720,7 @@ let initGame = (slot, gameContinued) => {
 				localPlayer.mp = Number(localStorage.slot2mp);
 				localPlayer.im = Number(localStorage.slot2im);
 				localPlayer.dir = Number(localStorage.slot2dir);
+				localPlayer.inventory = JSON.parse(localStorage.slot2Inventory);
 				localPlayer.currentFrame = 0;
 			}
 		}
@@ -798,6 +802,13 @@ let initGame = (slot, gameContinued) => {
 		},
 
 		// --------------------------------------------------- DRAWING
+	    drawMiniMap = () => {
+	    	let ratioW = mapSize/mapWidth,
+	    		ratioH = mapSize/mapHeight;
+	        f.drawImage(assets['minimapMain'], mapX, mapY, mapSize,mapSize);
+	        f.fillStyle = "#f00";
+	        f.fillRect(mapX+localPlayer.getTile().x*ratioW,mapY+localPlayer.getTile().y*ratioH,4,4);
+	    },
 		drawLayer = (data) => {
 			let imageSrc = assets['tiles'];
 			let startX = Math.floor(localPlayer.x/32) - halfOfTileCount,
@@ -824,6 +835,7 @@ let initGame = (slot, gameContinued) => {
 			localPlayer.draw();
 		},
 		drawInventory = () => {
+	        f.fillStyle = "#fff";
 			let itemSize = tileSize*2,
 				entryWidth = tileSize*6;
 
@@ -892,6 +904,7 @@ let initGame = (slot, gameContinued) => {
 		},
 		draw = () => {
 			displayStats();
+			drawMiniMap();
 			drawInventory();
 			drawTiles();
 			drawItems();

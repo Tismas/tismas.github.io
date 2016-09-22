@@ -39,6 +39,7 @@ let c = document.createElement('canvas'),
     characterBase = 0,
     slotUsed,
 
+    mapX = 1500, mapY = 0, mapSize = 420,
     inventoryX = 3, inventoryY = 390,
     tabWidth = 104, tabHeight = 25,
     inventoryTabs = ['Items','Weapons','Clothes','Fish'],
@@ -152,6 +153,8 @@ let c = document.createElement('canvas'),
         // entities
         addAsset('chicken', 'assets/mobs/chicken.png');
 
+        // map
+        addAsset('minimapMain', 'assets/maps/main.png');
         $.getJSON("assets/maps/main.json", function(json) {
             mapInfo = json;
             mapLoaded = true;
@@ -235,7 +238,8 @@ let c = document.createElement('canvas'),
             chatWindow.style.top = Math.round(marginTop + 620 * (c.height/frame.height)) + 'px';
             chatWindow.style.left = Math.round(marginLeft + 1 * (c.width/frame.width)) + 'px';
             chatWindow.style.width = Math.round(419 * (c.width/frame.width)) + 'px';
-            chatWindow.style.height = Math.round(420 * (c.height/frame.height)) + 'px';
+            chatWindow.style.height = Math.round(430 * (c.height/frame.height)) + 'px';
+            chatWindow.style.fontSize = Math.round(20 * (c.height/frame.height)) + 'px';
         }
     },
     addNameInput = () => {
