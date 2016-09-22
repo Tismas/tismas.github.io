@@ -102,7 +102,10 @@ let initGame = (slot, gameContinued) => {
 			this.x = x*tileSize;
 			this.y = y*tileSize;
 			this.id = id;
-			if(this.id == featherID) this.name = 'Feather';
+			if(this.id == featherID) {
+				this.name = 'Feather';
+				this.type = 'item';
+			}
 		}
 
 		draw() {
@@ -326,6 +329,27 @@ let initGame = (slot, gameContinued) => {
 					else {
 						this.resting = true;
 					}
+				}),
+				get: new Act(10, ()=> {
+					for(let i=0;i<items.length;i++) {
+						let distX = Math.abs(items[i].x - localPlayer.x)/32,
+							distY = Math.abs(items[i].y - localPlayer.y)/32;
+						if(distX <= 1 && distY <= 1) {
+							let found = false;
+							for(let i=0;i<this.inventory.length;i++) {
+								if(this.inventory[i].id == items[i].id) {
+									this.inventory[i].amount++;
+									found = true;
+									break;
+								}
+							}
+							if(!found) {
+								this.inventory.push({id:items[i].id,amount:1,type:items[i].type,name:items[i].name});
+							}
+							items.splice(items.indexOf(items[i]),1);
+							break;
+						}
+					}
 				})
 			}
 		}
@@ -416,7 +440,8 @@ let initGame = (slot, gameContinued) => {
 				this.y += this.vy/2;
 
 				if(this.vy < 0 && timer % 60 == 0) {
-					this.stamXp+=2;
+					this.healthXp+=3;
+					this.stamXp+=5;
 					this.stamina -= Math.round(Nasos.rand(10,100));
 					if(this.stamina < 0) this.stamina = 0;
 				}
@@ -465,6 +490,9 @@ let initGame = (slot, gameContinued) => {
 				}
 				else if(keys.w && this.mana >= 10) {
 					this.activities.waterBullets.use();
+				}
+				else if(keys.g) {
+					this.activities.get.use();
 				}
 			}
 		}
@@ -562,7 +590,7 @@ let initGame = (slot, gameContinued) => {
 		}
 	}
 
-	let	debugging = true,
+	let	debugging = false,
 		framesThisSecond = 0,
 		fps = 0,
 
@@ -704,12 +732,9 @@ let initGame = (slot, gameContinued) => {
             let ratioW = frame.width/c.width,
                 ratioH = frame.height/c.height,
                 canvasX = Math.round((e.clientX - marginLeft) * ratioW),
-                canvasY = Math.round((e.clientY - marginTop) * ratioH),
-                cx = 499, 
-                cy = 155, 
-                cs = 923;
-            contextMenu.x = (canvasX - cx) * (gameCanvas.width/cs);
-            contextMenu.y = (canvasY - cy) * (gameCanvas.height/cs);
+                canvasY = Math.round((e.clientY - marginTop) * ratioH);
+            contextMenu.x = (canvasX - gameCanvasX) * (gameCanvas.width/gameCanvasSize);
+            contextMenu.y = (canvasY - gameCanvasY) * (gameCanvas.height/gameCanvasSize);
             if(contextMenu.x > 0 && contextMenu.x < gameCanvas.width && contextMenu.y > 0 && contextMenu.y < gameCanvas.height) {
                 let options = '',
                 	optionCount = 0;
@@ -797,6 +822,21 @@ let initGame = (slot, gameContinued) => {
 		drawPlayers = () => {
 			localPlayer.draw();
 		},
+		drawInventory = () => {
+			let itemSize = tileSize*2,
+				entryWidth = tileSize*6;
+
+			for(let i=0;i<localPlayer.inventory.length;i++) {
+				if(activeInventoryTab == 0 && localPlayer.inventory[i].type == 'item') {
+					f.font = "20px Monospace";
+					f.drawImage(assets['items'], localPlayer.inventory[i].id*tileSize, 0, tileSize,tileSize, 
+						inventoryX + (i%2) * entryWidth, inventoryY + 20 + Math.floor(i/2) * itemSize, itemSize, itemSize);
+					f.fillText(localPlayer.inventory[i].name,inventoryX+(i%2)*entryWidth+itemSize*1.25,inventoryY+20+Math.floor(i/2)*itemSize + itemSize - 10);
+					f.font = "15px Monospace";
+					f.fillText(localPlayer.inventory[i].amount,inventoryX+(i%2)*entryWidth+itemSize*0.75,inventoryY+20+Math.floor(i/2)*itemSize + itemSize + 5);
+				}
+			}
+		},
 		drawTiles = () => {
 			drawLayer(layers[0].data);	// ground
 			drawLayer(layers[1].data);	// objects
@@ -805,17 +845,29 @@ let initGame = (slot, gameContinued) => {
 			f.font = "20px Monospace";
 			f.fillStyle = "#fff";
 
-			f.fillText(localPlayer.health + "/" + localPlayer.maxHealth,320,42);
-			f.fillText(localPlayer.stamina + "/" + localPlayer.maxStamina,320,88);
-			f.fillText(localPlayer.mana + "/" + localPlayer.maxMana,320,129);
+			let x = 15, y = 30;
 
-			f.fillText(localPlayer.moveSpeed,915,42);
-			f.fillText(localPlayer.castSpeed,915,88);
-			f.fillText(localPlayer.reflex,915,129);
+			f.fillText('Health:',x,y);
+			f.fillText( localPlayer.health + "/" + localPlayer.maxHealth, x+200, y);
+			f.fillText('Stamina:',x,y+20);
+			f.fillText( localPlayer.stamina + "/" + localPlayer.maxStamina, x+200, y+20);
+			f.fillText('Mana:',x,y+40);
+			f.fillText( localPlayer.mana + "/" + localPlayer.maxMana, x+200, y+40);
 
-			f.fillText(localPlayer.strength,1570,42);
-			f.fillText(localPlayer.mp,1570,88);
-			f.fillText(localPlayer.im,1570,129);
+			f.fillText('Move Speed:',x,y+80);
+			f.fillText( + localPlayer.moveSpeed, x+200, y+80);
+			f.fillText('Cast Speed:',x,y+100);
+			f.fillText( + localPlayer.castSpeed, x+200, y+100);
+			f.fillText('Reflex:',x,y+120);
+			f.fillText( localPlayer.reflex, x+200, y+120);
+
+			// class specific
+			f.fillText('Strength:',x,y+160);
+			f.fillText( localPlayer.strength, x+200, y+160);
+			f.fillText('Magic Power:',x,y+180);
+			f.fillText( + localPlayer.mp, x+200, y+180);
+			f.fillText('Illusion Power:',x,y+200);
+			f.fillText( + localPlayer.im, x+200, y+200);
 		},
 		drawMobs = () => {
 			for(let i=0;i<mobs.length;i++) {
@@ -839,6 +891,7 @@ let initGame = (slot, gameContinued) => {
 		},
 		draw = () => {
 			displayStats();
+			drawInventory();
 			drawTiles();
 			drawItems();
 			drawMobs();

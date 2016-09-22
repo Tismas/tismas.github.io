@@ -6,6 +6,9 @@ let c = document.createElement('canvas'),
     frame = document.createElement('canvas'),
     f = frame.getContext('2d'),
     gameCanvas = document.createElement('canvas'),
+    gameCanvasX = 435,
+    gameCanvasY = 13,
+    gameCanvasSize = 1054,
     g = gameCanvas.getContext('2d'),
     W = 1920,
     H = 1080,
@@ -35,6 +38,11 @@ let c = document.createElement('canvas'),
     characterBases = [''],
     characterBase = 0,
     slotUsed,
+
+    inventoryX = 3, inventoryY = 390,
+    tabWidth = 104, tabHeight = 25,
+    inventoryTabs = ['Items','Weapons','Clothes','Fish'],
+    activeInventoryTab = 0,
 
     // setup
     setup = () => {
@@ -134,6 +142,7 @@ let c = document.createElement('canvas'),
         addAsset('characterBase', 'assets/character/characterBase.png');
         addAsset('hair', 'assets/character/hair.png');
         addAsset('gameScreen', 'assets/ui/gameScreen.png');
+        addAsset('tab','assets/ui/tab.png');
         addAsset('tiles', 'assets/tiles/tiles.png');
         addAsset('items', 'assets/items/items.png');
         addAsset('fireball', 'assets/skills/fireball.png');
@@ -509,6 +518,12 @@ let c = document.createElement('canvas'),
                 contextMenu.open = false;
                 $('#custom-menu').css('display','none');
             }
+            for(let i=0;i<inventoryTabs.length;i++) {
+                if(Nasos.collidePR(clickPoint, {x:inventoryX+tabWidth*i,y:inventoryY,width:tabWidth,height:tabHeight})) {
+                    activeInventoryTab = i;
+                    break;
+                }
+            }
         }
     },
     mouseMoveCallback = (e) => {
@@ -559,7 +574,18 @@ let c = document.createElement('canvas'),
                 c.style.cursor = 'auto';
         }
         else {
-            c.style.cursor = 'auto';
+            let pointer = false;
+            for(let i=0;i<inventoryTabs.length;i++) {
+                if(!pointer && Nasos.collidePR(mousePoint, {x:inventoryX+tabWidth*i,y:inventoryY,width:tabWidth,height:tabHeight})) {
+                    pointer = true;
+                    break;
+                }
+            }
+
+            if(pointer)
+                c.style.cursor = 'pointer';
+            else
+                c.style.cursor = 'auto';
         }
     },
 
@@ -585,6 +611,18 @@ let c = document.createElement('canvas'),
                     f.drawImage(assets['button'], 1270 + i*205, 175 + j*205,200,200);
                 f.drawImage(assets['villages'], i*200, j*200,200,200, 1270 + i*205, 180 + j*205,200,200);
             }
+        }
+    },
+    displayInventoryTabs = () => {
+        f.font = "20px Monospace";
+        for(let i=0;i<inventoryTabs.length;i++) {
+            let len = f.measureText(inventoryTabs[i]).width;
+            f.fillStyle = 'rgba(255,255,255,0.9)';
+            if(activeInventoryTab == i)
+                f.drawImage(assets['tab'],100,0,100,25,inventoryX+i*tabWidth,inventoryY,tabWidth,tabHeight)
+            else
+                f.drawImage(assets['tab'],0,0,100,25,inventoryX+i*tabWidth,inventoryY,tabWidth,tabHeight);
+            f.fillText(inventoryTabs[i],inventoryX+i*tabWidth + tabWidth/2 - len/2,inventoryY+18);
         }
     },
     drawDesc = () => {
@@ -677,8 +715,8 @@ let c = document.createElement('canvas'),
         else if(currentScreen == 3) {
             clear();
             f.drawImage(assets['gameScreen'],0,0,W,H);
-            drawCharacter(0,0,150);
-            f.drawImage(gameCanvas,499,155,923,923);
+            f.drawImage(gameCanvas,gameCanvasX,gameCanvasY,gameCanvasSize,gameCanvasSize);
+            displayInventoryTabs();
             requestAnimationFrame(redraw);
         }
     },
