@@ -467,6 +467,7 @@ let initGame = (slot, gameContinued) => {
 			}
 		}
 		handleActivities() {
+			if($('#chat-input').is(':focus')) return;
 			if(keys.d && (this.stamina < this.maxStamina || this.mana < this.maxMana || this.health < this.maxHealth)) {
 				if(this.stamina < 0) this.stamina = 0;
 				this.activities.rest.use();
@@ -949,9 +950,19 @@ let initGame = (slot, gameContinued) => {
 		};
 
     c.oncontextmenu = contextMenuCallback;
+
 	setupGameCanvas();
 	setupEntities();
 	load();
+    chatInput.addEventListener('keyup',function(e) {
+        if(e.keyCode == 13) {
+            if(chatInput.value != "") {
+                chatWindow.innerHTML = chatWindow.innerHTML + "<font color='red'>" + localPlayer.name + "</font>" + ": " + chatInput.value + "<br>";
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                chatInput.value = "";
+            }
+        }
+    });
 	if(localPlayer.x % 32 != 0) localPlayer.x = localPlayer.x - localPlayer.x % 32;
 	if(localPlayer.y % 32 != 0) localPlayer.y = localPlayer.y - localPlayer.y % 32;
 	loop();

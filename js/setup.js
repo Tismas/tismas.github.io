@@ -31,7 +31,7 @@ let c = document.createElement('canvas'),
     villages = [],
     classDescriptions = [],
     villageDescriptions = [],
-    nameInput,
+    nameInput, chatWindow, chatInput,
     hairStyle = -1,
     rotation = 0,
     hairStylesCount,
@@ -224,6 +224,19 @@ let c = document.createElement('canvas'),
             nameInput.style.height = Math.round(60 * (c.height/frame.height)) + 'px';
             nameInput.style.fontSize = Math.round(50 * (c.height/frame.height)) + 'px';
         }
+        if(chatInput) {
+            chatInput.style.top = Math.round(marginTop + 1050 * (c.height/frame.height)) + 'px';
+            chatInput.style.left = Math.round(marginLeft + 1 * (c.width/frame.width)) + 'px';
+            chatInput.style.width = Math.round(419 * (c.width/frame.width)) + 'px';
+            chatInput.style.height = Math.round(30 * (c.height/frame.height)) + 'px';
+            chatInput.style.fontSize = Math.round(20 * (c.height/frame.height)) + 'px';
+        }
+        if(chatWindow) {
+            chatWindow.style.top = Math.round(marginTop + 620 * (c.height/frame.height)) + 'px';
+            chatWindow.style.left = Math.round(marginLeft + 1 * (c.width/frame.width)) + 'px';
+            chatWindow.style.width = Math.round(419 * (c.width/frame.width)) + 'px';
+            chatWindow.style.height = Math.round(420 * (c.height/frame.height)) + 'px';
+        }
     },
     addNameInput = () => {
         nameInput = document.createElement('input');
@@ -243,6 +256,42 @@ let c = document.createElement('canvas'),
         nameInput.placeholder = 'Username';
 
         document.body.appendChild(nameInput);
+    },
+    addChat = () => {
+        chatWindow = document.createElement('div');
+        chatWindow.id = 'chat-window';
+        chatWindow.style.position = 'absolute';
+        chatWindow.style.top = Math.round(marginTop + 620 * (c.height/frame.height)) + 'px';
+        chatWindow.style.left = Math.round(marginLeft + 1 * (c.width/frame.width)) + 'px';
+        chatWindow.style.width = Math.round(419 * (c.width/frame.width)) + 'px';
+        chatWindow.style.height = Math.round(430 * (c.height/frame.height)) + 'px';
+        chatWindow.style.borderRadius = '5px';
+        chatWindow.style.border = '2px solid white';
+        chatWindow.style.textAlign = 'left';
+        chatWindow.style.fontSize = Math.round(20 * (c.height/frame.height)) + 'px';
+        chatWindow.style.background = 'black';
+        chatWindow.style.color = 'white';
+        chatWindow.style.outline = 'none';
+        chatWindow.style.zIndex = '120';
+        chatWindow.style.overflow = 'auto';
+
+        chatInput = document.createElement('input');
+        chatInput.id = 'chat-input';
+        chatInput.type = 'text';
+        chatInput.style.position = 'absolute';
+        chatInput.style.top = Math.round(marginTop + 1050 * (c.height/frame.height)) + 'px';
+        chatInput.style.left = Math.round(marginLeft + 1 * (c.width/frame.width)) + 'px';
+        chatInput.style.width = Math.round(419 * (c.width/frame.width)) + 'px';
+        chatInput.style.height = Math.round(30 * (c.height/frame.height)) + 'px';
+        chatInput.style.borderRadius = '5px';
+        chatInput.style.textAlign = 'left';
+        chatInput.style.fontSize = Math.round(20 * (c.height/frame.height)) + 'px';
+        chatInput.style.background = 'black';
+        chatInput.style.color = 'white';
+        chatInput.style.outline = 'none';
+
+        document.body.appendChild(chatInput);
+        document.body.appendChild(chatWindow);
     },
 
     // input handle
@@ -741,6 +790,7 @@ let c = document.createElement('canvas'),
         currentScreen = 3;
         if(!loading)
             nameInput.remove();
+        addChat();
         redraw();
         initGame(slotUsed, loading);
     };
