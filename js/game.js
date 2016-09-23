@@ -348,9 +348,9 @@ let initGame = (slot, gameContinued) => {
 							distY = Math.abs(items[i].y - localPlayer.y)/32;
 						if(distX <= 1 && distY <= 1) {
 							let found = false;
-							for(let i=0;i<this.inventory.length;i++) {
-								if(this.inventory[i].id == items[i].id) {
-									this.inventory[i].amount++;
+							for(let j=0;j<this.inventory.length;j++) {
+								if(this.inventory[j].id == items[i].id) {
+									this.inventory[j].amount++;
 									found = true;
 									break;
 								}
