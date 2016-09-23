@@ -228,7 +228,7 @@ let initGame = (slot, gameContinued) => {
 
 	class Player {
 		constructor(x,y) {
-			this.inventory = [];
+			this.inventory = []; // {id: ,amount: ,type: ,name: }
 			this.x = x * tileSize;
 			this.y = y * tileSize;
 			
@@ -270,6 +270,7 @@ let initGame = (slot, gameContinued) => {
 			this.attacking = false;
 			this.resting = false;
 			this.onWater = false;
+			this.rockChance = 1;
 
 			this.name = slot == 1 ? localStorage.slot1Name : localStorage.slot2Name;
 			this.class = slot == 1 ? classes[localStorage.slot1Class] : classes[localStorage.slot2Class];
@@ -289,6 +290,17 @@ let initGame = (slot, gameContinued) => {
 				}),
 				waterBullets: new Act(10*this.castSpeed, () => {
 					spells.push(new Spell(this.x,this.y,this.dir,'water',this.mp));
+					this.mpXp += 5;
+					this.manaXp += 3;
+					this.mana -= 10;
+					if(this.castSpeed > 1) {
+						if(Math.floor(Math.random()*100) == 1)
+							this.castSpeed -= 0.1;
+					}
+					this.setCooldownOnAll();
+				}),
+				windProjectile: new Act(10*this.castSpeed, () => {
+					spells.push(new Spell(this.x,this.y,this.dir,'wind',this.mp));
 					this.mpXp += 5;
 					this.manaXp += 3;
 					this.mana -= 10;
@@ -454,7 +466,21 @@ let initGame = (slot, gameContinued) => {
 			if(this.x%32 == 0) this.vx = 0;
 			if(this.y%32 == 0) this.vy = 0;
 
-			if(this.vx || this.vy) this.moving = true;
+			if(this.vx || this.vy) {
+				this.moving = true;
+				if(Math.floor(Math.random()*5000) < this.rockChance) {
+					let found = false;
+					for(let i=0;i<this.inventory.length;i++) {
+						if(this.inventory[i].id == rockID) {
+							found = true;
+							this.inventory[i].amount++;
+							break;
+						}
+					}
+					if(!found)
+						this.inventory.push({id:rockID,amount:1,type:'item',name:'rock'});
+				}
+			}
 			else this.moving = false;
 			offsetX = localPlayer.x - halfOfTileCount*tileSize;
 			offsetY = localPlayer.y - halfOfTileCount*tileSize;
@@ -491,6 +517,9 @@ let initGame = (slot, gameContinued) => {
 				}
 				else if(keys.w && this.mana >= 10) {
 					this.activities.waterBullets.use();
+				}
+				else if(keys.q && this.mana >= 10) {
+					this.activities.windProjectile.use();
 				}
 				else if(keys.g) {
 					this.activities.get.use();
@@ -598,6 +627,7 @@ let initGame = (slot, gameContinued) => {
 		treeStumpID = 6,
 		chickenID = 101,
 		featherID = 0,
+		rockID = 1,
 		
 		frameRate = 60,
 		timer = 0,

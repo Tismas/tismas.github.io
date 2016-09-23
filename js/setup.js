@@ -151,6 +151,7 @@ let c = document.createElement('canvas'),
         addAsset('fireball', 'assets/skills/fireball.png');
         addAsset('stone', 'assets/skills/stone.png');
         addAsset('water', 'assets/skills/water.png');
+        addAsset('wind', 'assets/skills/windProj.png');
 
         // entities
         addAsset('chicken', 'assets/mobs/chicken.png');
