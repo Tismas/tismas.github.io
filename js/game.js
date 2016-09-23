@@ -276,7 +276,7 @@ let initGame = (slot, gameContinued) => {
 			this.village = slot == 1 ? villages[localStorage.slot1Village] : villages[localStorage.slot2Village];
 
 			this.activities = {
-				fireball: new Act(200*this.castSpeed, () => {
+				fireball: new Act(10*this.castSpeed, () => {
 					spells.push(new Spell(this.x,this.y,this.dir,'fireball',this.mp));
 					this.mpXp += 5;
 					this.manaXp += 3;
@@ -287,7 +287,7 @@ let initGame = (slot, gameContinued) => {
 					}
 					this.setCooldownOnAll();
 				}),
-				waterBullets: new Act(200*this.castSpeed, () => {
+				waterBullets: new Act(10*this.castSpeed, () => {
 					spells.push(new Spell(this.x,this.y,this.dir,'water',this.mp));
 					this.mpXp += 5;
 					this.manaXp += 3;
@@ -298,7 +298,7 @@ let initGame = (slot, gameContinued) => {
 					}
 					this.setCooldownOnAll();
 				}),
-				stoneThrow: new Act(200*this.castSpeed, () => {
+				stoneThrow: new Act(10*this.castSpeed, () => {
 					spells.push(new Spell(this.x,this.y,this.dir,'stone',this.mp));
 					this.mpXp += 5;
 					this.manaXp += 3;
@@ -701,7 +701,7 @@ let initGame = (slot, gameContinued) => {
 				localPlayer.mp = Number(localStorage.slot1mp);
 				localPlayer.im = Number(localStorage.slot1im);
 				localPlayer.dir = Number(localStorage.slot1dir);
-				localPlayer.inventory = JSON.parse(localStorage.slot1Inventory);
+				localPlayer.inventory = JSON.parse(localStorage.slot1Inventory) || {};
 				localPlayer.currentFrame = 0;
 			}
 			else if(currentSlot == 2 && gameContinued) {
@@ -720,7 +720,7 @@ let initGame = (slot, gameContinued) => {
 				localPlayer.mp = Number(localStorage.slot2mp);
 				localPlayer.im = Number(localStorage.slot2im);
 				localPlayer.dir = Number(localStorage.slot2dir);
-				localPlayer.inventory = JSON.parse(localStorage.slot2Inventory);
+				localPlayer.inventory = JSON.parse(localStorage.slot2Inventory) || {};
 				localPlayer.currentFrame = 0;
 			}
 		}
@@ -842,10 +842,20 @@ let initGame = (slot, gameContinued) => {
 			for(let i=0;i<localPlayer.inventory.length;i++) {
 				if(activeInventoryTab == 0 && localPlayer.inventory[i].type == 'item') {
 					f.font = "20px Monospace";
+					let textPos = {x:inventoryX+(i%2)*entryWidth+itemSize*1.25,
+								   y:inventoryY+20+Math.floor(i/2)*itemSize + itemSize - 30,
+								   width:f.measureText(localPlayer.inventory[i].name).width,
+								   height:20};
+					if(Nasos.collidePR(mousePoint,textPos))
+						f.fillStyle = "rgba(200,200,255,0.9)";
+					else
+						f.fillStyle = "rgba(255,255,255,0.9)";
 					f.drawImage(assets['items'], localPlayer.inventory[i].id*tileSize, 0, tileSize,tileSize, 
 						inventoryX + (i%2) * entryWidth, inventoryY + 20 + Math.floor(i/2) * itemSize, itemSize, itemSize);
-					f.fillText(localPlayer.inventory[i].name,inventoryX+(i%2)*entryWidth+itemSize*1.25,inventoryY+20+Math.floor(i/2)*itemSize + itemSize - 10);
+					f.fillText(localPlayer.inventory[i].name,textPos.x,textPos.y+20);
+					
 					f.font = "15px Monospace";
+					f.fillStyle = "rgba(255,255,255,0.9)";
 					f.fillText(localPlayer.inventory[i].amount,inventoryX+(i%2)*entryWidth+itemSize*0.75,inventoryY+20+Math.floor(i/2)*itemSize + itemSize + 5);
 				}
 			}

@@ -38,6 +38,7 @@ let c = document.createElement('canvas'),
     characterBases = [''],
     characterBase = 0,
     slotUsed,
+    mousePoint,
 
     mapX = 1500, mapY = 0, mapSize = 420,
     inventoryX = 3, inventoryY = 390,
@@ -55,6 +56,7 @@ let c = document.createElement('canvas'),
 
         document.onkeydown = keydownCallback;
         document.onkeyup = keyupCallback;
+        window.onblur = onblurCallback;
 
         Math.seedrandom(999);
 
@@ -425,6 +427,11 @@ let c = document.createElement('canvas'),
         if(e.keyCode == 90)
             keys.z = false;
     },
+    onblurCallback = (e) => {
+        for(let key in keys) {
+            keys[key] = false;
+        }
+    },
     clickCallback = (e) => {
         let canvasX = Math.round((e.clientX - marginLeft) * (frame.width/c.width)),
             canvasY = Math.round((e.clientY - marginTop) * (frame.height/c.height));
@@ -583,8 +590,8 @@ let c = document.createElement('canvas'),
         let ratioW = frame.width/c.width,
             ratioH = frame.height/c.height,
             canvasX = Math.round((e.clientX - marginLeft) * ratioW),
-            canvasY = Math.round((e.clientY - marginTop) * ratioH),
-            mousePoint = {x: canvasX, y:canvasY};
+            canvasY = Math.round((e.clientY - marginTop) * ratioH);
+        mousePoint = {x: canvasX, y:canvasY};
 
         if(currentScreen == 1 && (Nasos.collidePR(mousePoint, {x:100,y:370,width:130,height:40}) || Nasos.collidePR(mousePoint, {x:100,y:880,width:130,height:40}) || Nasos.collidePR(mousePoint, {x:240,y:370,width:130,height:40}) || Nasos.collidePR(mousePoint, {x:240,y:880,width:130,height:40}))) {
             c.style.cursor = 'pointer';
