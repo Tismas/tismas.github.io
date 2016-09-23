@@ -731,7 +731,7 @@ let initGame = (slot, gameContinued) => {
 				localPlayer.mp = Number(localStorage.slot1mp);
 				localPlayer.im = Number(localStorage.slot1im);
 				localPlayer.dir = Number(localStorage.slot1dir);
-				localPlayer.inventory = JSON.parse(localStorage.slot1Inventory) || {};
+				localPlayer.inventory = JSON.parse(localStorage.slot1Inventory || '{}');
 				localPlayer.currentFrame = 0;
 			}
 			else if(currentSlot == 2 && gameContinued) {
@@ -750,7 +750,7 @@ let initGame = (slot, gameContinued) => {
 				localPlayer.mp = Number(localStorage.slot2mp);
 				localPlayer.im = Number(localStorage.slot2im);
 				localPlayer.dir = Number(localStorage.slot2dir);
-				localPlayer.inventory = JSON.parse(localStorage.slot2Inventory) || {};
+				localPlayer.inventory = JSON.parse(localStorage.slot2Inventory || '{}');
 				localPlayer.currentFrame = 0;
 			}
 		}
