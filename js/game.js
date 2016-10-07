@@ -900,27 +900,34 @@ let initGame = (slot, gameContinued) => {
 
 			let x = 15, y = 30;
 
-			f.fillText('Health:',x,y);
-			f.fillText( localPlayer.health + "/" + localPlayer.maxHealth, x+200, y);
-			f.fillText('Stamina:',x,y+20);
-			f.fillText( localPlayer.stamina + "/" + localPlayer.maxStamina, x+200, y+20);
-			f.fillText('Mana:',x,y+40);
-			f.fillText( localPlayer.mana + "/" + localPlayer.maxMana, x+200, y+40);
+			f.fillText('Name: ',x,y);
+			f.fillText(localPlayer.name,x+200,y);
+			f.fillText('Class: ',x,y+20);
+			f.fillText(localPlayer.class,x+200,y+20);
+			f.fillText('Village: ',x,y+40);
+			f.fillText(localPlayer.village,x+200,y+40);
 
-			f.fillText('Move Speed:',x,y+80);
-			f.fillText( + localPlayer.moveSpeed, x+200, y+80);
-			f.fillText('Cast Speed:',x,y+100);
-			f.fillText( + localPlayer.castSpeed, x+200, y+100);
-			f.fillText('Reflex:',x,y+120);
-			f.fillText( localPlayer.reflex, x+200, y+120);
+			f.fillText('Health:',x,y+80);
+			f.fillText( localPlayer.health + "/" + localPlayer.maxHealth, x+200, y+80);
+			f.fillText('Stamina:',x,y+100);
+			f.fillText( localPlayer.stamina + "/" + localPlayer.maxStamina, x+200, y+100);
+			f.fillText('Mana:',x,y+120);
+			f.fillText( localPlayer.mana + "/" + localPlayer.maxMana, x+200, y+120);
+
+			f.fillText('Move Speed:',x,y+160);
+			f.fillText( + localPlayer.moveSpeed, x+200, y+160);
+			f.fillText('Cast Speed:',x,y+180);
+			f.fillText( + localPlayer.castSpeed, x+200, y+180);
+			f.fillText('Reflex:',x,y+200);
+			f.fillText( localPlayer.reflex, x+200, y+200);
 
 			// class specific
-			f.fillText('Strength:',x,y+160);
-			f.fillText( localPlayer.strength, x+200, y+160);
-			f.fillText('Magic Power:',x,y+180);
-			f.fillText( + localPlayer.mp, x+200, y+180);
-			f.fillText('Illusion Power:',x,y+200);
-			f.fillText( + localPlayer.im, x+200, y+200);
+			f.fillText('Strength:',x,y+240);
+			f.fillText( localPlayer.strength, x+200, y+240);
+			f.fillText('Magic Power:',x,y+260);
+			f.fillText( + localPlayer.mp, x+200, y+260);
+			f.fillText('Illusion Power:',x,y+280);
+			f.fillText( + localPlayer.im, x+200, y+280);
 		},
 		drawMobs = () => {
 			for(let i=0;i<mobs.length;i++) {
@@ -944,7 +951,7 @@ let initGame = (slot, gameContinued) => {
 		},
 		draw = () => {
 			displayStats();
-			drawMiniMap();
+			//drawMiniMap();
 			drawInventory();
 			drawTiles();
 			drawItems();
