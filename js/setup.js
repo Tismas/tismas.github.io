@@ -700,8 +700,9 @@ let c = document.createElement('canvas'),
         f.drawImage(assets['water'], 0,0,32,32,1530,600,50,50);
         f.fillText('Cost: 10    Key: W', 1610, 630);
 
-        f.fillText('Rest        Key: D', 1610, 680);
-        f.fillText('Attack      Key: A', 1610, 730);
+        f.fillText('Rest        Key: D', 1610, 700);
+        f.fillText('Attack      Key: A', 1610, 750);
+        f.fillText('Get         Key: G', 1610, 800);
     },
     drawDesc = () => {
         f.font = "20px Monospace";
