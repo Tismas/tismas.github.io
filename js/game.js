@@ -951,7 +951,7 @@ let initGame = (slot, gameContinued) => {
 		},
 		draw = () => {
 			displayStats();
-			//drawMiniMap();
+			drawMiniMap();
 			drawInventory();
 			drawTiles();
 			drawItems();

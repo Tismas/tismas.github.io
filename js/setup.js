@@ -689,19 +689,19 @@ let c = document.createElement('canvas'),
     displaySkillSettings = () => {
         f.font = '20px Monospace white';
         f.drawImage(assets['fireball'], 0,0,32,32,1530,450,50,50);
-        f.fillText('Cost: 10    Key: f', 1610, 480);
+        f.fillText('Cost: 10    Key: F', 1610, 480);
 
         f.drawImage(assets['wind'], 0,0,32,32,1530,500,50,50);
-        f.fillText('Cost: 10    Key: q', 1610, 530);
+        f.fillText('Cost: 10    Key: Q', 1610, 530);
 
         f.drawImage(assets['stone'], 0,0,32,32,1530,550,50,50);
-        f.fillText('Cost: 10    Key: s', 1610, 580);
+        f.fillText('Cost: 10    Key: S', 1610, 580);
 
         f.drawImage(assets['water'], 0,0,32,32,1530,600,50,50);
-        f.fillText('Cost: 10    Key: w', 1610, 630);
+        f.fillText('Cost: 10    Key: W', 1610, 630);
 
-        f.fillText('Rest    Cost: 10    Key: d', 1530, 730);
-        f.fillText('Attack  Cost: 10    Key: a', 1530, 780);
+        f.fillText('Rest    Cost: 10    Key: D', 1530, 730);
+        f.fillText('Attack  Cost: 10    Key: A', 1530, 780);
     },
     drawDesc = () => {
         f.font = "20px Monospace";
