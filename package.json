@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "nodemon server/index.js",
+    "deploy": "gh-pages -d public"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^2.1.1",
+    "nodemon": "^1.19.4"
+  }
+}

@@ -1,4 +1,9 @@
-let initGame = (slot, gameContinued) => {
+import Nasos from "./Nasos.js";
+import mapInfo from "../../assets/maps/main.js";
+import { c, g, f, gameCanvas, classes, villages, assets, chatInput, mapSize, mapX, mapY, characterBases, characterBase, hairStyle, keys, activeInventoryTab, inventoryX, inventoryY, mousePoint, frame, marginLeft, marginTop, contextMenu, gameCanvasX, gameCanvasY, gameCanvasSize, chatInputEl, customMenu } from './setup.js';
+
+
+export let initGame = (slot, gameContinued) => {
 
 	class flowingText {
 		constructor(text,x,y) {
@@ -493,7 +498,7 @@ let initGame = (slot, gameContinued) => {
 			}
 		}
 		handleActivities() {
-			if($('#chat-input').is(':focus')) return;
+			if(chatInputEl === document.activeElement) return;
 			if(keys.d && (this.stamina < this.maxStamina || this.mana < this.maxMana || this.health < this.maxHealth)) {
 				if(this.stamina < 0) this.stamina = 0;
 				this.activities.rest.use();
@@ -753,7 +758,7 @@ let initGame = (slot, gameContinued) => {
 				localPlayer.inventory = JSON.parse(localStorage.slot2Inventory || '[]');
 				localPlayer.currentFrame = 0;
 			}
-		}
+		},
 		clearGameCanvas = () => {
 			g.fillStyle = "#000";
 			g.fillRect(0,0,screenSize,screenSize);
@@ -799,10 +804,10 @@ let initGame = (slot, gameContinued) => {
 
                 if(optionCount > 0) {
 	                contextMenu.open = true;
-	                $('#custom-menu').css('display','block');
-	                $('#custom-menu').css('left', e.clientX + 'px');
-	                $('#custom-menu').css('top', e.clientY + 'px');
-	                $('#custom-menu').html(options);
+	                customMenu.style.display = 'block';
+	                customMenu.style.left = e.clientX + 'px';
+	                customMenu.style.top = e.clientY + 'px';
+	                customMenu.innerHTML = options;
 	            }
             }
 	        return false;
