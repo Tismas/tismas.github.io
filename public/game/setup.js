@@ -2,7 +2,7 @@
 import Nasos from "./Nasos.js";
 import { initGame } from "./game.js";
 
-export const chatInputEl = document.getElementById("chat-input");
+export let chatInputEl = document.getElementById("chat-input");
 export const customMenu = document.getElementById("custom-menu");
 export let c = document.createElement("canvas"),
   ctx = c.getContext("2d"),
@@ -951,6 +951,7 @@ export let c = document.createElement("canvas"),
     addChat();
     redraw();
     initGame(slotUsed, loading);
+    chatInputEl = document.getElementById("chat-input");
   };
 
 setup();
