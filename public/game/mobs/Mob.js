@@ -1,5 +1,5 @@
 import { tileSize, screenSize } from "../constants.js";
-import { g } from "../setup.js";
+import { g } from "../globals.js";
 import { offsetX, offsetY } from "../camera.js";
 
 export class Mob {

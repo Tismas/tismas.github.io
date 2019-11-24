@@ -3,25 +3,24 @@ import {
   halfOfTileCount,
   blockingLayer,
   mapWidth,
-  groundLayer
-} from "../constants.js";
-import {
+  groundLayer,
   classes,
-  villages,
-  g,
-  assets,
-  characterBases,
-  characterBase,
-  hairStyle,
-  keys,
-  chatInputEl
-} from "../setup.js";
+  villages
+} from "../constants.js";
+import { g, chatInputEl } from "../globals.js";
 import { Act } from "./Act.js";
 import { mobs, timer, flowingTexts, items, spells, rockID } from "../game.js";
 import { Treestump } from "../mobs/Treestump.js";
 import { setCameraPosition } from "../camera.js";
 import { FlowingText } from "../effects/FlowingText.js";
 import { Spell } from "./Spell.js";
+import {
+  assets,
+  characterBases,
+  characterBase,
+  hairStyle
+} from "../utils/assets.js";
+import { keys } from "../utils/input.js";
 
 const inFront = (pos1, dir, pos2) => {
   if (

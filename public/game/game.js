@@ -9,36 +9,33 @@ import {
   screenSize,
   canvasTileCount,
   entitiesLayer,
-  groundLayer
+  groundLayer,
+  gameCanvasX,
+  gameCanvasSize,
+  gameCanvasY,
+  mapSize,
+  mapX,
+  mapY
 } from "./constants.js";
 import { Chicken } from "./mobs/Chicken.js";
 import { Treestump } from "./mobs/Treestump.js";
-import {
-  c,
-  g,
-  f,
-  gameCanvas,
-  assets,
-  chatInput,
-  mapSize,
-  mapX,
-  mapY,
-  activeInventoryTab,
-  inventoryX,
-  inventoryY,
-  mousePoint,
-  frame,
-  marginLeft,
-  marginTop,
-  contextMenu,
-  gameCanvasX,
-  gameCanvasY,
-  gameCanvasSize,
-  customMenu,
-  chatWindow
-} from "./setup.js";
 import { offsetX, offsetY } from "./camera.js";
 import { Player } from "./player/Player.js";
+import { assets } from "./utils/assets.js";
+import {
+  g,
+  c,
+  frame,
+  gameCanvas,
+  f,
+  inventoryX,
+  inventoryY,
+  customMenu
+} from "./globals.js";
+import { chatInput, activeInventoryTab } from "./utils/ui.js";
+import { mousePoint } from "./utils/input.js";
+import { marginLeft, marginTop } from "./utils/canvas.js";
+import { contextMenu } from "./utils/contextMenu.js";
 
 export let items = [],
   mobs = [],

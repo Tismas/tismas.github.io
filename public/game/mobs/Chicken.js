@@ -1,7 +1,7 @@
 import { Mob } from "./Mob.js";
-import { assets } from "../setup.js";
 import { items } from "../game.js";
 import { Item, featherID } from "../Items/Item.js";
+import { assets } from "../utils/assets.js";
 
 export class Chicken extends Mob {
   static ID = 101;

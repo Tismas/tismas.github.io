@@ -1,4 +1,4 @@
-import { g } from "../setup.js";
+import { g } from "../globals.js";
 import { tileSize } from "../constants.js";
 import { offsetX, offsetY } from "../camera.js";
 

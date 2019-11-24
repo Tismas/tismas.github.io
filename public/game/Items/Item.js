@@ -1,6 +1,7 @@
 import { tileSize, screenSize } from "../constants.js";
 import { offsetX, offsetY } from "../camera.js";
-import { g, assets } from "../setup.js";
+import { assets } from "../utils/assets.js";
+import { g } from "../globals.js";
 
 export const featherID = 0;
 

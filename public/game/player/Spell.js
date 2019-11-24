@@ -3,8 +3,9 @@ import { offsetX, offsetY } from "../camera.js";
 import { timer, mobs, flowingTexts, spells } from "../game.js";
 import Nasos from "../Nasos.js";
 import { blockingLayer, tileSize, mapWidth } from "../constants.js";
-import { g, assets } from "../setup.js";
+import { g } from "../globals.js";
 import { Treestump } from "../mobs/Treestump.js";
+import { assets } from "../utils/assets.js";
 
 export class Spell {
   constructor(x, y, dir, asset, power) {

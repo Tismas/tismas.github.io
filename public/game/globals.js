@@ -1,0 +1,24 @@
+export let chatInputEl = document.getElementById("chat-input");
+export const customMenu = document.getElementById("custom-menu");
+export const c = document.createElement("canvas");
+export const ctx = c.getContext("2d");
+export const frame = document.createElement("canvas");
+export const f = frame.getContext("2d");
+export const gameCanvas = document.createElement("canvas");
+export const g = gameCanvas.getContext("2d");
+export let currentScreen = 0;
+export const inventoryX = 3;
+export const inventoryY = 390;
+export const tabWidth = 104;
+export const tabHeight = 25;
+export let rotation = 0;
+export let slotUsed = -1;
+export let classDesc = "Choose a class";
+export let villageDesc = "Choose a village";
+
+export const setCurrentScreen = screen => (currentScreen = screen);
+export const setSlotUsed = slot => (slotUsed = slot);
+export const setRotation = r => (rotation = r);
+export const setClassDesc = desc => (classDesc = desc);
+export const setVillageDesc = desc => (villageDesc = desc);
+export const setChatInputEl = el => (chatInputEl = el);
