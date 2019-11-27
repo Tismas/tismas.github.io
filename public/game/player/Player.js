@@ -21,7 +21,7 @@ import {
   hairStyle
 } from "../utils/assets.js";
 import { keys } from "../utils/input.js";
-import { pickUpItem } from "../Items/item.js";
+import { pickUpItem } from "../items/item.js";
 
 const inFront = (pos1, dir, pos2) => {
   if (

@@ -40,7 +40,7 @@ import {
   drawDamageParticles,
   updateDamageParticles
 } from "./effects/damageParticle.js";
-import { drawItems, items } from "./Items/item.js";
+import { drawItems, items } from "./items/item.js";
 
 export let mobs = [],
   spells = [],

@@ -1,5 +1,5 @@
 import { Mob } from "./Mob.js";
-import { createFeather } from "../Items/feather.js";
+import { createFeather } from "../items/feather.js";
 import { assets } from "../utils/assets.js";
 import { tileSize } from "../constants.js";
 
