@@ -36,11 +36,14 @@ import { chatInput, activeInventoryTab } from "./utils/ui.js";
 import { mousePoint } from "./utils/input.js";
 import { marginLeft, marginTop } from "./utils/canvas.js";
 import { contextMenu } from "./utils/contextMenu.js";
+import {
+  drawDamageParticles,
+  updateDamageParticles
+} from "./effects/damageParticle.js";
 
 export let items = [],
   mobs = [],
   spells = [],
-  flowingTexts = [],
   debugging = false,
   framesThisSecond = 0,
   fps = 0,
@@ -374,9 +377,6 @@ export let initGame = (slot, gameContinued) => {
         items[i].draw();
       }
     },
-    drawFlowingTexts = () => {
-      for (let i = 0; i < flowingTexts.length; i++) flowingTexts[i].draw();
-    },
     drawSpells = () => {
       for (let i = 0; i < spells.length; i++) {
         spells[i].draw();
@@ -391,14 +391,9 @@ export let initGame = (slot, gameContinued) => {
       drawMobs();
       drawSpells();
       drawPlayers();
-      drawFlowingTexts();
+      drawDamageParticles();
     },
     // ----------------------------------------------- UPDATING
-    updateTexts = () => {
-      for (let i = 0; i < flowingTexts.length; i++) {
-        flowingTexts[i].update();
-      }
-    },
     updateMobs = () => {
       for (let i = 0; i < mobs.length; i++) {
         if (!mobs[i].dead) mobs[i].update();
@@ -421,8 +416,8 @@ export let initGame = (slot, gameContinued) => {
         updateMobs();
         updateSpells();
         updatePlayers();
-        updateTexts();
-        if (timer == 30) updateTexts();
+        updateDamageParticles();
+        if (timer == 30) updateDamageParticles();
 
         lastUpdate += 1000 / frameRate;
       }

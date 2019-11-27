@@ -9,10 +9,10 @@ import {
 } from "../constants.js";
 import { g, chatInputEl } from "../globals.js";
 import { Act } from "./Act.js";
-import { mobs, timer, flowingTexts, items, spells, rockID } from "../game.js";
+import { mobs, timer, items, spells, rockID } from "../game.js";
 import { Treestump } from "../mobs/Treestump.js";
 import { setCameraPosition } from "../camera.js";
-import { FlowingText } from "../effects/FlowingText.js";
+import { addDamageParticle } from "../effects/damageParticle.js";
 import { Spell } from "./Spell.js";
 import {
   assets,
@@ -148,7 +148,7 @@ export class Player {
           target.hp -= this.strength;
           target.deathCheck();
         }
-        flowingTexts.push(new FlowingText(this.strength, target.x, target.y));
+        addDamageParticle(target.x, target.y, this.strength);
       }),
       rest: new Act(40, () => {
         if (this.resting) this.resting = false;
