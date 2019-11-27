@@ -9,8 +9,7 @@ import {
 } from "../constants.js";
 import { g, chatInputEl } from "../globals.js";
 import { Act } from "./Act.js";
-import { mobs, timer, spells } from "../game.js";
-import { Treestump } from "../mobs/Treestump.js";
+import { timer, spells } from "../game.js";
 import { setCameraPosition } from "../camera.js";
 import { addDamageParticle } from "../effects/damageParticle.js";
 import { Spell } from "./Spell.js";
@@ -24,6 +23,8 @@ import { keys } from "../utils/input.js";
 import { pickUpItem } from "../items/item.js";
 import { createRock } from "../items/itemCreators.js";
 import Nasos from "../Nasos.js";
+import { mobs } from "../mobs/mob.js";
+import { getTile } from "../utils/tile.js";
 
 const inFront = (pos1, dir, pos2) => {
   if (
@@ -140,7 +141,7 @@ export class Player {
       }),
       punch: new Act(40, target => {
         this.attacking = true;
-        if (target.type == Treestump.ID) {
+        if (target.name == "Treestump") {
           this.stamina -= Math.floor(
             this.strength * (0.4 + Math.random() * 0.4)
           );
@@ -149,9 +150,8 @@ export class Player {
           if (this.stamina < 1) this.stamina = 1;
         } else {
           target.hp -= this.strength;
-          target.deathCheck();
         }
-        addDamageParticle(target.x, target.y, this.strength);
+        addDamageParticle(target.position, this.strength);
       }),
       rest: new Act(40, () => {
         if (this.resting) this.resting = false;
@@ -249,9 +249,8 @@ export class Player {
 
         let entityBlocking = false;
         for (let i = 0; i < mobs.length; i++) {
-          let mobTile = mobs[i].getTile();
+          let mobTile = getTile(mobs[i].position);
           if (
-            !mobs[i].dead &&
             playerTile.x + (this.vx > 0) - (this.vx < 0) == mobTile.x &&
             playerTile.y + (this.vy > 0) - (this.vy < 0) == mobTile.y
           ) {
@@ -338,10 +337,7 @@ export class Player {
     } else if (this.stamina > 1 && !this.resting) {
       let target = null;
       for (let i = 0; i < mobs.length; i++) {
-        if (
-          !mobs[i].dead &&
-          inFront(this.getTile(), this.dir, mobs[i].getTile())
-        ) {
+        if (inFront(this.getTile(), this.dir, getTile(mobs[i].position))) {
           target = mobs[i];
           break;
         }
