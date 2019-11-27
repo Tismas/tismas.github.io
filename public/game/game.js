@@ -199,8 +199,8 @@ export let initGame = (slot, gameContinued) => {
         for (let i = 0; i < items.length; i++) {
           if (
             Nasos.collidePR(contextMenu, {
-              x: items[i].x - offsetX,
-              y: items[i].y - offsetY,
+              x: items[i].position.x - offsetX,
+              y: items[i].position.y - offsetY,
               width: tileSize,
               height: tileSize
             })
