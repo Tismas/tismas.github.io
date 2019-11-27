@@ -1,5 +1,6 @@
 import { Mob } from "./Mob.js";
-import { createFeather } from "../items/feather.js";
+import { addItemToWorld } from "../items/item.js";
+import { createFeather } from "../items/itemCreators.js";
 import { assets } from "../utils/assets.js";
 import { tileSize } from "../constants.js";
 
@@ -15,7 +16,8 @@ export class Chicken extends Mob {
     if (!this.dead && this.hp <= 0) {
       this.dead = true;
       let t = this.getTile();
-      createFeather(t.x * tileSize, t.y * tileSize);
+      const position = { x: t.x * tileSize, y: t.y * tileSize };
+      addItemToWorld(position, createFeather());
       setTimeout(this.respawn.bind(this), this.respawnTime);
     }
   }

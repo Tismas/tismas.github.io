@@ -22,6 +22,8 @@ import {
 } from "../utils/assets.js";
 import { keys } from "../utils/input.js";
 import { pickUpItem } from "../items/item.js";
+import { createRock } from "../items/itemCreators.js";
+import Nasos from "../Nasos.js";
 
 const inFront = (pos1, dir, pos2) => {
   if (
@@ -307,10 +309,8 @@ export class Player {
         }
         if (!found)
           this.inventory.push({
-            assetPosition: { x: tileSize, y: 0 },
-            amount: 1,
-            type: "item",
-            name: "Rock"
+            ...createRock(),
+            amount: 1
           });
       }
     } else this.moving = false;

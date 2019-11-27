@@ -20,8 +20,12 @@ export const pickUpItem = entity => {
   return pickedUpItem;
 };
 
-export const createItem = (position, name, assetPosition) => {
-  items.push({ position, name, assetPosition, type: "item" });
+export const addItemToWorld = (position, item) => {
+  items.push({ position, ...item });
+};
+
+export const createItem = (name, assetPosition) => {
+  return { name, assetPosition, type: "item" };
 };
 
 const drawItem = (x, y, item) => {
