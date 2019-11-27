@@ -47,7 +47,6 @@ export let mobs = [],
   debugging = false,
   framesThisSecond = 0,
   fps = 0,
-  rockID = 1,
   frameRate = 60,
   localPlayer,
   timer = 0;
@@ -294,8 +293,8 @@ export let initGame = (slot, gameContinued) => {
           else f.fillStyle = "rgba(255,255,255,0.9)";
           f.drawImage(
             assets["items"],
-            localPlayer.inventory[i].id * tileSize,
-            0,
+            localPlayer.inventory[i].assetPosition.x,
+            localPlayer.inventory[i].assetPosition.y,
             tileSize,
             tileSize,
             inventoryX + (i % 2) * entryWidth,

@@ -9,7 +9,7 @@ import {
 } from "../constants.js";
 import { g, chatInputEl } from "../globals.js";
 import { Act } from "./Act.js";
-import { mobs, timer, spells, rockID } from "../game.js";
+import { mobs, timer, spells } from "../game.js";
 import { Treestump } from "../mobs/Treestump.js";
 import { setCameraPosition } from "../camera.js";
 import { addDamageParticle } from "../effects/damageParticle.js";
@@ -172,8 +172,7 @@ export class Player {
         if (!inInventory) {
           this.inventory.push({
             amount: 1,
-            type: pickedUpItem.type,
-            name: pickedUpItem.name
+            ...pickedUpItem
           });
         }
       })
@@ -300,7 +299,7 @@ export class Player {
       if (Math.floor(Math.random() * 5000) < this.rockChance) {
         let found = false;
         for (let i = 0; i < this.inventory.length; i++) {
-          if (this.inventory[i].id == rockID) {
+          if (this.inventory[i].name == "Rock") {
             found = true;
             this.inventory[i].amount++;
             break;
@@ -308,10 +307,10 @@ export class Player {
         }
         if (!found)
           this.inventory.push({
-            id: rockID,
+            assetPosition: { x: tileSize, y: 0 },
             amount: 1,
             type: "item",
-            name: "rock"
+            name: "Rock"
           });
       }
     } else this.moving = false;

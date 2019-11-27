@@ -13,7 +13,8 @@ import {
   setVillageDesc,
   rotation,
   setRotation,
-  customMenu
+  customMenu,
+  f
 } from "../globals.js";
 import { marginLeft, marginTop } from "./canvas.js";
 import {
