@@ -40,9 +40,9 @@ import {
   drawDamageParticles,
   updateDamageParticles
 } from "./effects/damageParticle.js";
+import { drawItems, items } from "./Items/item.js";
 
-export let items = [],
-  mobs = [],
+export let mobs = [],
   spells = [],
   debugging = false,
   framesThisSecond = 0,
@@ -370,11 +370,6 @@ export let initGame = (slot, gameContinued) => {
     drawMobs = () => {
       for (let i = 0; i < mobs.length; i++) {
         if (!mobs[i].dead) mobs[i].draw();
-      }
-    },
-    drawItems = () => {
-      for (let i = 0; i < items.length; i++) {
-        items[i].draw();
       }
     },
     drawSpells = () => {
