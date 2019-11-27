@@ -45,6 +45,7 @@ export const loadAssets = () => {
 
   // entities
   addAsset("chicken", "assets/mobs/chicken.png");
+  addAsset("treestump", "assets/mobs/treestump.png");
 
   // map
   addAsset("minimapMain", "assets/maps/main.png");

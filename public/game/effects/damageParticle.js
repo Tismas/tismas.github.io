@@ -4,10 +4,10 @@ import { offsetX, offsetY } from "../camera.js";
 
 let damageParticles = [];
 
-export const addDamageParticle = (tileX, tileY, text) => {
+export const addDamageParticle = (position, text) => {
   const width = g.measureText(text).width;
-  const x = tileX + tileSize / 2 - width / 2;
-  const y = tileY + 5;
+  const x = position.x + tileSize / 2 - width / 2;
+  const y = position.y + 5;
   damageParticles.push({ x, y, text, opacity: 1 });
 };
 

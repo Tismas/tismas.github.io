@@ -1,11 +1,11 @@
 import { addDamageParticle } from "../effects/damageParticle.js";
 import { offsetX, offsetY } from "../camera.js";
-import { timer, mobs, spells } from "../game.js";
+import { timer, spells } from "../game.js";
 import Nasos from "../Nasos.js";
 import { blockingLayer, tileSize, mapWidth } from "../constants.js";
 import { g } from "../globals.js";
-import { Treestump } from "../mobs/Treestump.js";
 import { assets } from "../utils/assets.js";
+import { mobs } from "../mobs/mob.js";
 
 export class Spell {
   constructor(x, y, dir, asset, power) {
@@ -58,17 +58,20 @@ export class Spell {
     let toDel = false;
     for (let i = 0; i < mobs.length; i++) {
       if (
-        !mobs[i].dead &&
         Nasos.intersects(
           { x: this.x, y: this.y, width: tileSize, height: tileSize },
-          { x: mobs[i].x, y: mobs[i].y, width: tileSize, height: tileSize }
+          {
+            x: mobs[i].position.x,
+            y: mobs[i].position.y,
+            width: tileSize,
+            height: tileSize
+          }
         )
       ) {
-        if (mobs[i].type != Treestump.ID) {
+        if (mobs[i].hp !== undefined) {
           mobs[i].hp -= this.power;
-          mobs[i].deathCheck();
         }
-        addDamageParticle(mobs[i].x, mobs[i].y, this.power);
+        addDamageParticle(mobs[i].position, this.power);
         toDel = true;
         break;
       }

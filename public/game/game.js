@@ -17,8 +17,8 @@ import {
   mapX,
   mapY
 } from "./constants.js";
-import { Chicken } from "./mobs/Chicken.js";
-import { Treestump } from "./mobs/Treestump.js";
+import { mobs, drawMobs, updateMobs } from "./mobs/mob.js";
+import { spawners } from "./mobs/mobSpawners.js";
 import { offsetX, offsetY } from "./camera.js";
 import { Player } from "./player/Player.js";
 import { assets } from "./utils/assets.js";
@@ -42,8 +42,7 @@ import {
 } from "./effects/damageParticle.js";
 import { drawItems, items } from "./items/item.js";
 
-export let mobs = [],
-  spells = [],
+export let spells = [],
   debugging = false,
   framesThisSecond = 0,
   fps = 0,
@@ -184,10 +183,9 @@ export let initGame = (slot, gameContinued) => {
 
         for (let i = 0; i < mobs.length; i++) {
           if (
-            !mobs[i].dead &&
             Nasos.collidePR(contextMenu, {
-              x: mobs[i].x - offsetX,
-              y: mobs[i].y - offsetY,
+              x: mobs[i].position.x - offsetX,
+              y: mobs[i].position.y - offsetY,
               width: tileSize,
               height: tileSize
             })
@@ -223,9 +221,11 @@ export let initGame = (slot, gameContinued) => {
     setupEntities = () => {
       for (let i = 0; i < mapHeight; i++) {
         for (let j = 0; j < mapWidth; j++) {
-          let entity = entitiesLayer[i * mapWidth + j];
-          if (entity == Treestump.ID) mobs.push(new Treestump(j, i));
-          else if (entity == Chicken.ID) mobs.push(new Chicken(j, i));
+          const entityID = entitiesLayer[i * mapWidth + j];
+          const spawnMob = spawners[entityID];
+          if (spawnMob) {
+            spawnMob(j * tileSize, i * tileSize);
+          }
         }
       }
     },
@@ -366,11 +366,6 @@ export let initGame = (slot, gameContinued) => {
       f.fillText("Illusion Power:", x, y + 280);
       f.fillText(+localPlayer.im, x + 200, y + 280);
     },
-    drawMobs = () => {
-      for (let i = 0; i < mobs.length; i++) {
-        if (!mobs[i].dead) mobs[i].draw();
-      }
-    },
     drawSpells = () => {
       for (let i = 0; i < spells.length; i++) {
         spells[i].draw();
@@ -388,11 +383,6 @@ export let initGame = (slot, gameContinued) => {
       drawDamageParticles();
     },
     // ----------------------------------------------- UPDATING
-    updateMobs = () => {
-      for (let i = 0; i < mobs.length; i++) {
-        if (!mobs[i].dead) mobs[i].update();
-      }
-    },
     updatePlayers = () => {
       localPlayer.update();
     },
