@@ -21,7 +21,7 @@ export const pickUpItem = entity => {
 };
 
 export const createItem = (position, name, assetPosition) => {
-  items.push({ position, name, assetPosition });
+  items.push({ position, name, assetPosition, type: "item" });
 };
 
 const drawItem = (x, y, item) => {
