@@ -3,25 +3,25 @@ import {
   halfOfTileCount,
   blockingLayer,
   mapWidth,
-  groundLayer
-} from "../constants.js";
-import {
+  groundLayer,
   classes,
-  villages,
-  g,
+  villages
+} from "../constants.js";
+import { g, chatInputEl } from "../globals.js";
+import { Act } from "./Act.js";
+import { mobs, timer, spells, rockID } from "../game.js";
+import { Treestump } from "../mobs/Treestump.js";
+import { setCameraPosition } from "../camera.js";
+import { addDamageParticle } from "../effects/damageParticle.js";
+import { Spell } from "./Spell.js";
+import {
   assets,
   characterBases,
   characterBase,
-  hairStyle,
-  keys,
-  chatInputEl
-} from "../setup.js";
-import { Act } from "./Act.js";
-import { mobs, timer, flowingTexts, items, spells, rockID } from "../game.js";
-import { Treestump } from "../mobs/Treestump.js";
-import { setCameraPosition } from "../camera.js";
-import { FlowingText } from "../effects/FlowingText.js";
-import { Spell } from "./Spell.js";
+  hairStyle
+} from "../utils/assets.js";
+import { keys } from "../utils/input.js";
+import { pickUpItem } from "../Items/item.js";
 
 const inFront = (pos1, dir, pos2) => {
   if (
@@ -149,7 +149,7 @@ export class Player {
           target.hp -= this.strength;
           target.deathCheck();
         }
-        flowingTexts.push(new FlowingText(this.strength, target.x, target.y));
+        addDamageParticle(target.x, target.y, this.strength);
       }),
       rest: new Act(40, () => {
         if (this.resting) this.resting = false;
@@ -158,29 +158,23 @@ export class Player {
         }
       }),
       get: new Act(10, () => {
-        for (let i = 0; i < items.length; i++) {
-          let distX = Math.abs(items[i].x - this.x) / 32,
-            distY = Math.abs(items[i].y - this.y) / 32;
-          if (distX <= 1 && distY <= 1) {
-            let found = false;
-            for (let j = 0; j < this.inventory.length; j++) {
-              if (this.inventory[j].id == items[i].id) {
-                this.inventory[j].amount++;
-                found = true;
-                break;
-              }
-            }
-            if (!found) {
-              this.inventory.push({
-                id: items[i].id,
-                amount: 1,
-                type: items[i].type,
-                name: items[i].name
-              });
-            }
-            items.splice(items.indexOf(items[i]), 1);
+        const pickedUpItem = pickUpItem(this);
+        if (!pickedUpItem) return;
+
+        let inInventory = false;
+        for (let j = 0; j < this.inventory.length; j++) {
+          if (this.inventory[j].name == pickedUpItem.name) {
+            this.inventory[j].amount++;
+            inInventory = true;
             break;
           }
+        }
+        if (!inInventory) {
+          this.inventory.push({
+            amount: 1,
+            type: pickedUpItem.type,
+            name: pickedUpItem.name
+          });
         }
       })
     };

@@ -1,7 +1,7 @@
 import { Mob } from "./Mob.js";
-import { assets } from "../setup.js";
-import { items } from "../game.js";
-import { Item, featherID } from "../Items/Item.js";
+import { createFeather } from "../Items/feather.js";
+import { assets } from "../utils/assets.js";
+import { tileSize } from "../constants.js";
 
 export class Chicken extends Mob {
   static ID = 101;
@@ -15,7 +15,7 @@ export class Chicken extends Mob {
     if (!this.dead && this.hp <= 0) {
       this.dead = true;
       let t = this.getTile();
-      items.push(new Item(t.x, t.y, featherID));
+      createFeather(t.x * tileSize, t.y * tileSize);
       setTimeout(this.respawn.bind(this), this.respawnTime);
     }
   }

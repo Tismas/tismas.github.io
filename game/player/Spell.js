@@ -1,10 +1,11 @@
-import { FlowingText } from "../effects/FlowingText.js";
+import { addDamageParticle } from "../effects/damageParticle.js";
 import { offsetX, offsetY } from "../camera.js";
-import { timer, mobs, flowingTexts, spells } from "../game.js";
+import { timer, mobs, spells } from "../game.js";
 import Nasos from "../Nasos.js";
 import { blockingLayer, tileSize, mapWidth } from "../constants.js";
-import { g, assets } from "../setup.js";
+import { g } from "../globals.js";
 import { Treestump } from "../mobs/Treestump.js";
+import { assets } from "../utils/assets.js";
 
 export class Spell {
   constructor(x, y, dir, asset, power) {
@@ -67,7 +68,7 @@ export class Spell {
           mobs[i].hp -= this.power;
           mobs[i].deathCheck();
         }
-        flowingTexts.push(new FlowingText(this.power, mobs[i].x, mobs[i].y));
+        addDamageParticle(mobs[i].x, mobs[i].y, this.power);
         toDel = true;
         break;
       }

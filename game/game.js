@@ -9,41 +9,41 @@ import {
   screenSize,
   canvasTileCount,
   entitiesLayer,
-  groundLayer
+  groundLayer,
+  gameCanvasX,
+  gameCanvasSize,
+  gameCanvasY,
+  mapSize,
+  mapX,
+  mapY
 } from "./constants.js";
 import { Chicken } from "./mobs/Chicken.js";
 import { Treestump } from "./mobs/Treestump.js";
-import {
-  c,
-  g,
-  f,
-  gameCanvas,
-  assets,
-  chatInput,
-  mapSize,
-  mapX,
-  mapY,
-  activeInventoryTab,
-  inventoryX,
-  inventoryY,
-  mousePoint,
-  frame,
-  marginLeft,
-  marginTop,
-  contextMenu,
-  gameCanvasX,
-  gameCanvasY,
-  gameCanvasSize,
-  customMenu,
-  chatWindow
-} from "./setup.js";
 import { offsetX, offsetY } from "./camera.js";
 import { Player } from "./player/Player.js";
+import { assets } from "./utils/assets.js";
+import {
+  g,
+  c,
+  frame,
+  gameCanvas,
+  f,
+  inventoryX,
+  inventoryY,
+  customMenu
+} from "./globals.js";
+import { chatInput, activeInventoryTab } from "./utils/ui.js";
+import { mousePoint } from "./utils/input.js";
+import { marginLeft, marginTop } from "./utils/canvas.js";
+import { contextMenu } from "./utils/contextMenu.js";
+import {
+  drawDamageParticles,
+  updateDamageParticles
+} from "./effects/damageParticle.js";
+import { drawItems, items } from "./Items/item.js";
 
-export let items = [],
-  mobs = [],
+export let mobs = [],
   spells = [],
-  flowingTexts = [],
   debugging = false,
   framesThisSecond = 0,
   fps = 0,
@@ -372,14 +372,6 @@ export let initGame = (slot, gameContinued) => {
         if (!mobs[i].dead) mobs[i].draw();
       }
     },
-    drawItems = () => {
-      for (let i = 0; i < items.length; i++) {
-        items[i].draw();
-      }
-    },
-    drawFlowingTexts = () => {
-      for (let i = 0; i < flowingTexts.length; i++) flowingTexts[i].draw();
-    },
     drawSpells = () => {
       for (let i = 0; i < spells.length; i++) {
         spells[i].draw();
@@ -394,14 +386,9 @@ export let initGame = (slot, gameContinued) => {
       drawMobs();
       drawSpells();
       drawPlayers();
-      drawFlowingTexts();
+      drawDamageParticles();
     },
     // ----------------------------------------------- UPDATING
-    updateTexts = () => {
-      for (let i = 0; i < flowingTexts.length; i++) {
-        flowingTexts[i].update();
-      }
-    },
     updateMobs = () => {
       for (let i = 0; i < mobs.length; i++) {
         if (!mobs[i].dead) mobs[i].update();
@@ -424,8 +411,8 @@ export let initGame = (slot, gameContinued) => {
         updateMobs();
         updateSpells();
         updatePlayers();
-        updateTexts();
-        if (timer == 30) updateTexts();
+        updateDamageParticles();
+        if (timer == 30) updateDamageParticles();
 
         lastUpdate += 1000 / frameRate;
       }

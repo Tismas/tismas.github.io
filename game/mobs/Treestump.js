@@ -1,7 +1,8 @@
 import { offsetX, offsetY } from "../camera.js";
 import { tileSize, screenSize } from "../constants.js";
-import { assets, g } from "../setup.js";
+import { g } from "../globals.js";
 import { Mob } from "./Mob.js";
+import { assets } from "../utils/assets.js";
 
 export class Treestump extends Mob {
   static ID = 6;
