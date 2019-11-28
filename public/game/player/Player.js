@@ -9,10 +9,9 @@ import {
 } from "../constants.js";
 import { g, chatInputEl } from "../globals.js";
 import { Act } from "./Act.js";
-import { timer, spells } from "../game.js";
+import { timer } from "../game.js";
 import { setCameraPosition } from "../camera.js";
 import { addDamageParticle } from "../effects/damageParticle.js";
-import { Spell } from "./Spell.js";
 import {
   assets,
   characterBases,
@@ -25,6 +24,8 @@ import { createRock } from "../items/itemCreators.js";
 import Nasos from "../Nasos.js";
 import { mobs } from "../mobs/mob.js";
 import { getTile } from "../utils/tile.js";
+import { createProjectile } from "./projectile.js";
+import { getVectorFromDirection } from "../utils/getVectorFromDirection.js";
 
 const inFront = (pos1, dir, pos2) => {
   if (
@@ -45,8 +46,8 @@ const inFront = (pos1, dir, pos2) => {
 export class Player {
   constructor(x, y, slot) {
     this.inventory = []; // {id: ,amount: ,type: ,name: }
-    this.x = x * tileSize;
-    this.y = y * tileSize;
+    this.position = { x: x * tileSize, y: y * tileSize };
+    this.velocity = { x: 0, y: 0 };
 
     this.maxHealth = 100;
     this.health = this.maxHealth;
@@ -79,8 +80,6 @@ export class Player {
 
     this.dir = 2;
     this.currentFrame = 0;
-    this.vx = 0;
-    this.vy = 0;
     this.moving = false;
     this.anotherLeg = true;
     this.attacking = false;
@@ -100,7 +99,7 @@ export class Player {
 
     this.activities = {
       fireball: new Act(10 * this.castSpeed, () => {
-        spells.push(new Spell(this.x, this.y, this.dir, "fireball", this.mp));
+        createProjectile(this.position, this.dir, assets["fireball"], this.mp);
         this.mpXp += 5;
         this.manaXp += 3;
         this.mana -= 10;
@@ -110,7 +109,7 @@ export class Player {
         this.setCooldownOnAll();
       }),
       waterBullets: new Act(10 * this.castSpeed, () => {
-        spells.push(new Spell(this.x, this.y, this.dir, "water", this.mp));
+        createProjectile(this.position, this.dir, assets["water"], this.mp);
         this.mpXp += 5;
         this.manaXp += 3;
         this.mana -= 10;
@@ -120,7 +119,7 @@ export class Player {
         this.setCooldownOnAll();
       }),
       windProjectile: new Act(10 * this.castSpeed, () => {
-        spells.push(new Spell(this.x, this.y, this.dir, "wind", this.mp));
+        createProjectile(this.position, this.dir, assets["wind"], this.mp);
         this.mpXp += 5;
         this.manaXp += 3;
         this.mana -= 10;
@@ -130,7 +129,7 @@ export class Player {
         this.setCooldownOnAll();
       }),
       stoneThrow: new Act(10 * this.castSpeed, () => {
-        spells.push(new Spell(this.x, this.y, this.dir, "stone", this.mp));
+        createProjectile(this.position, this.dir, assets["stone"], this.mp);
         this.mpXp += 5;
         this.manaXp += 3;
         this.mana -= 10;
@@ -180,9 +179,6 @@ export class Player {
       })
     };
   }
-  getTile() {
-    return { x: Math.round(this.x / 32), y: Math.round(this.y / 32) };
-  }
   draw() {
     let dir;
     if (this.dir == 1 || this.dir == 4 || this.dir == 7) dir = 3;
@@ -214,45 +210,40 @@ export class Player {
       );
   }
   handleMovement() {
-    let playerTile = this.getTile();
+    let playerTile = getTile(this.position);
     if (this.stamina > 0) {
-      if (!(this.x % 32) && !(this.y % 32)) {
+      if (!(this.position.x % 32) && !(this.position.y % 32)) {
+        let dir;
         if (keys.down && keys.left) {
-          this.dir = 1;
-          this.vx = -this.moveSpeed;
-          this.vy = this.moveSpeed;
+          dir = 1;
         } else if (keys.down && keys.right) {
-          this.dir = 3;
-          this.vx = this.moveSpeed;
-          this.vy = this.moveSpeed;
+          dir = 3;
         } else if (keys.up && keys.left) {
-          this.dir = 7;
-          this.vx = -this.moveSpeed;
-          this.vy = -this.moveSpeed;
+          dir = 7;
         } else if (keys.up && keys.right) {
-          this.dir = 9;
-          this.vx = this.moveSpeed;
-          this.vy = -this.moveSpeed;
+          dir = 9;
         } else if (keys.down) {
-          this.dir = 2;
-          this.vy = this.moveSpeed;
+          dir = 2;
         } else if (keys.left) {
-          this.dir = 4;
-          this.vx = -this.moveSpeed;
+          dir = 4;
         } else if (keys.right) {
-          this.dir = 6;
-          this.vx = this.moveSpeed;
+          dir = 6;
         } else if (keys.up) {
-          this.dir = 8;
-          this.vy = -this.moveSpeed;
+          dir = 8;
+        }
+        if (dir) {
+          this.dir = dir;
+          this.velocity = getVectorFromDirection(this.dir);
         }
 
         let entityBlocking = false;
         for (let i = 0; i < mobs.length; i++) {
           let mobTile = getTile(mobs[i].position);
           if (
-            playerTile.x + (this.vx > 0) - (this.vx < 0) == mobTile.x &&
-            playerTile.y + (this.vy > 0) - (this.vy < 0) == mobTile.y
+            playerTile.x + (this.velocity.x > 0) - (this.velocity.x < 0) ==
+              mobTile.x &&
+            playerTile.y + (this.velocity.y > 0) - (this.velocity.y < 0) ==
+              mobTile.y
           ) {
             entityBlocking = true;
             break;
@@ -261,41 +252,42 @@ export class Player {
         if (
           entityBlocking ||
           blockingLayer[
-            (playerTile.y + (this.vy > 0) - (this.vy < 0)) * mapWidth +
+            (playerTile.y + (this.velocity.y > 0) - (this.velocity.y < 0)) *
+              mapWidth +
               playerTile.x +
-              (this.vx > 0) -
-              (this.vx < 0)
+              (this.velocity.x > 0) -
+              (this.velocity.x < 0)
           ]
         ) {
-          this.vx = 0;
-          this.vy = 0;
+          this.velocity.x = 0;
+          this.velocity.y = 0;
         }
       }
     }
 
     if (
-      Math.round(this.x) != this.x ||
-      Math.round(this.y) != this.y ||
+      Math.round(this.position.x) != this.position.x ||
+      Math.round(this.position.y) != this.position.y ||
       groundLayer[playerTile.y * mapWidth + playerTile.x] == 34
     ) {
-      this.x += this.vx / 2;
-      this.y += this.vy / 2;
+      this.position.x += this.velocity.x / 2;
+      this.position.y += this.velocity.y / 2;
 
-      if (this.vy < 0 && timer % 60 == 0) {
+      if (this.velocity.y < 0 && timer % 60 == 0) {
         this.healthXp += 3;
         this.stamXp += 5;
         this.stamina -= Math.round(Nasos.rand(10, 100));
         if (this.stamina < 0) this.stamina = 0;
       }
     } else {
-      this.x += this.vx;
-      this.y += this.vy;
+      this.position.x += this.velocity.x;
+      this.position.y += this.velocity.y;
     }
 
-    if (this.x % 32 == 0) this.vx = 0;
-    if (this.y % 32 == 0) this.vy = 0;
+    if (this.position.x % 32 == 0) this.velocity.x = 0;
+    if (this.position.y % 32 == 0) this.velocity.y = 0;
 
-    if (this.vx || this.vy) {
+    if (this.velocity.x || this.velocity.y) {
       this.moving = true;
       if (Math.floor(Math.random() * 5000) < this.rockChance) {
         let found = false;
@@ -313,8 +305,8 @@ export class Player {
           });
       }
     } else this.moving = false;
-    const x = this.x - halfOfTileCount * tileSize;
-    const y = this.y - halfOfTileCount * tileSize;
+    const x = this.position.x - halfOfTileCount * tileSize;
+    const y = this.position.y - halfOfTileCount * tileSize;
     setCameraPosition(x, y);
   }
   setCooldownOnAll() {
@@ -337,7 +329,9 @@ export class Player {
     } else if (this.stamina > 1 && !this.resting) {
       let target = null;
       for (let i = 0; i < mobs.length; i++) {
-        if (inFront(this.getTile(), this.dir, getTile(mobs[i].position))) {
+        if (
+          inFront(getTile(this.position), this.dir, getTile(mobs[i].position))
+        ) {
           target = mobs[i];
           break;
         }
@@ -424,11 +418,11 @@ export class Player {
         }
       }
     } else if (this.moving) {
-      if (this.x % 32 == 5 || this.y % 32 == 5)
+      if (this.position.x % 32 == 5 || this.position.y % 32 == 5)
         this.anotherLeg = !this.anotherLeg;
       if (
-        (this.x % 32 >= 8 && this.x % 32 <= 24) ||
-        (this.y % 32 >= 8 && this.y % 32 <= 24)
+        (this.position.x % 32 >= 8 && this.position.x % 32 <= 24) ||
+        (this.position.y % 32 >= 8 && this.position.y % 32 <= 24)
       ) {
         this.currentFrame = 4 + this.anotherLeg * 2;
       } else this.currentFrame = 3;

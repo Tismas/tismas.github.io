@@ -41,9 +41,10 @@ import {
   updateDamageParticles
 } from "./effects/damageParticle.js";
 import { drawItems, items } from "./items/item.js";
+import { getTile } from "./utils/tile.js";
+import { drawProjectiles, updateProjectiles } from "./player/projectile.js";
 
-export let spells = [],
-  debugging = false,
+export let debugging = false,
   framesThisSecond = 0,
   fps = 0,
   frameRate = 60,
@@ -57,12 +58,12 @@ export let initGame = (slot, gameContinued) => {
     debug = () => {
       g.font = "15px Monospace";
 
-      let tileX = localPlayer.getTile().x,
-        tileY = localPlayer.getTile().y;
+      let tileX = getTile(localPlayer.position).x,
+        tileY = getTile(localPlayer.position).y;
       g.fillStyle = "#fff";
       g.fillText("DEBUGING MODE ON", 20, 10);
-      g.fillText("x: " + localPlayer.x, 20, 25);
-      g.fillText("y: " + localPlayer.y, 20, 40);
+      g.fillText("x: " + localPlayer.position.x, 20, 25);
+      g.fillText("y: " + localPlayer.position.y, 20, 40);
       g.fillText("Tile x: " + tileX, 20, 55);
       g.fillText("Tile y: " + tileY, 20, 70);
       g.fillText("Dir: " + localPlayer.dir, 20, 85);
@@ -79,8 +80,8 @@ export let initGame = (slot, gameContinued) => {
     },
     save = () => {
       if (currentSlot == 1) {
-        localStorage.slot1x = localPlayer.x;
-        localStorage.slot1y = localPlayer.y;
+        localStorage.slot1x = localPlayer.position.x;
+        localStorage.slot1y = localPlayer.position.y;
         localStorage.slot1maxHealth = localPlayer.maxHealth;
         localStorage.slot1health = localPlayer.health;
         localStorage.slot1maxMana = localPlayer.maxMana;
@@ -97,8 +98,8 @@ export let initGame = (slot, gameContinued) => {
         localStorage.slot1Inventory = JSON.stringify(localPlayer.inventory);
       }
       if (currentSlot == 2) {
-        localStorage.slot2x = localPlayer.x;
-        localStorage.slot2y = localPlayer.y;
+        localStorage.slot2x = localPlayer.position.x;
+        localStorage.slot2y = localPlayer.position.y;
         localStorage.slot2maxHealth = localPlayer.maxHealth;
         localStorage.slot2health = localPlayer.health;
         localStorage.slot2maxMana = localPlayer.maxMana;
@@ -117,8 +118,8 @@ export let initGame = (slot, gameContinued) => {
     },
     load = () => {
       if (currentSlot == 1 && gameContinued) {
-        localPlayer.x = Number(localStorage.slot1x);
-        localPlayer.y = Number(localStorage.slot1y);
+        localPlayer.position.x = Number(localStorage.slot1x);
+        localPlayer.position.y = Number(localStorage.slot1y);
         localPlayer.maxHealth = Number(localStorage.slot1maxHealth);
         localPlayer.health = Number(localStorage.slot1health);
         localPlayer.maxMana = Number(localStorage.slot1maxMana);
@@ -135,8 +136,8 @@ export let initGame = (slot, gameContinued) => {
         localPlayer.inventory = JSON.parse(localStorage.slot1Inventory || "[]");
         localPlayer.currentFrame = 0;
       } else if (currentSlot == 2 && gameContinued) {
-        localPlayer.x = Number(localStorage.slot2x);
-        localPlayer.y = Number(localStorage.slot2y);
+        localPlayer.position.x = Number(localStorage.slot2x);
+        localPlayer.position.y = Number(localStorage.slot2y);
         localPlayer.maxHealth = Number(localStorage.slot2maxHealth);
         localPlayer.health = Number(localStorage.slot2health);
         localPlayer.maxMana = Number(localStorage.slot2maxMana);
@@ -236,16 +237,16 @@ export let initGame = (slot, gameContinued) => {
       f.drawImage(assets["minimapMain"], mapX, mapY, mapSize, mapSize);
       f.fillStyle = "#f00";
       f.fillRect(
-        mapX + localPlayer.getTile().x * ratioW,
-        mapY + localPlayer.getTile().y * ratioH,
+        mapX + getTile(localPlayer.position).x * ratioW,
+        mapY + getTile(localPlayer.position).y * ratioH,
         4,
         4
       );
     },
     drawLayer = data => {
       let imageSrc = assets["tiles"];
-      let startX = Math.floor(localPlayer.x / 32) - halfOfTileCount,
-        startY = Math.floor(localPlayer.y / 32) - halfOfTileCount;
+      let startX = Math.floor(localPlayer.position.x / 32) - halfOfTileCount,
+        startY = Math.floor(localPlayer.position.y / 32) - halfOfTileCount;
 
       for (let i = 0; i <= canvasTileCount; i++) {
         for (let j = 0; j <= canvasTileCount; j++) {
@@ -259,8 +260,8 @@ export let initGame = (slot, gameContinued) => {
               Math.floor(index / tilesetColumns) * tileSize,
               tileSize,
               tileSize,
-              j * tileSize - Math.floor(localPlayer.x % 32),
-              i * tileSize - Math.floor(localPlayer.y % 32),
+              j * tileSize - Math.floor(localPlayer.position.x % 32),
+              i * tileSize - Math.floor(localPlayer.position.y % 32),
               tileSize,
               tileSize
             );
@@ -366,11 +367,6 @@ export let initGame = (slot, gameContinued) => {
       f.fillText("Illusion Power:", x, y + 280);
       f.fillText(+localPlayer.im, x + 200, y + 280);
     },
-    drawSpells = () => {
-      for (let i = 0; i < spells.length; i++) {
-        spells[i].draw();
-      }
-    },
     draw = () => {
       displayStats();
       drawMiniMap();
@@ -378,18 +374,13 @@ export let initGame = (slot, gameContinued) => {
       drawTiles();
       drawItems();
       drawMobs();
-      drawSpells();
+      drawProjectiles();
       drawPlayers();
       drawDamageParticles();
     },
     // ----------------------------------------------- UPDATING
     updatePlayers = () => {
       localPlayer.update();
-    },
-    updateSpells = () => {
-      for (let i = 0; i < spells.length; i++) {
-        spells[i].update();
-      }
     },
     update = () => {
       let now = new Date().getTime();
@@ -398,7 +389,7 @@ export let initGame = (slot, gameContinued) => {
         timer++;
         if (timer == 180) timer = 0;
         updateMobs();
-        updateSpells();
+        updateProjectiles();
         updatePlayers();
         updateDamageParticles();
         if (timer == 30) updateDamageParticles();
@@ -437,10 +428,12 @@ export let initGame = (slot, gameContinued) => {
       }
     }
   });
-  if (localPlayer.x % 32 != 0)
-    localPlayer.x = localPlayer.x - (localPlayer.x % 32);
-  if (localPlayer.y % 32 != 0)
-    localPlayer.y = localPlayer.y - (localPlayer.y % 32);
+  if (localPlayer.position.x % 32 != 0)
+    localPlayer.position.x =
+      localPlayer.position.x - (localPlayer.position.x % 32);
+  if (localPlayer.position.y % 32 != 0)
+    localPlayer.position.y =
+      localPlayer.position.y - (localPlayer.position.y % 32);
   loop();
   save();
   setInterval(save, 1000);
