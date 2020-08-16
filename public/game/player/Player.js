@@ -5,7 +5,7 @@ import {
   mapWidth,
   groundLayer,
   classes,
-  villages
+  villages,
 } from "../constants.js";
 import { g, chatInputEl } from "../globals.js";
 import { Act } from "./Act.js";
@@ -16,7 +16,7 @@ import {
   assets,
   characterBases,
   characterBase,
-  hairStyle
+  hairStyle,
 } from "../utils/assets.js";
 import { keys } from "../utils/input.js";
 import { pickUpItem } from "../items/item.js";
@@ -138,7 +138,7 @@ export class Player {
         }
         this.setCooldownOnAll();
       }),
-      punch: new Act(40, target => {
+      punch: new Act(40, (target) => {
         this.attacking = true;
         if (target.name == "Treestump") {
           this.stamina -= Math.floor(
@@ -173,10 +173,10 @@ export class Player {
         if (!inInventory) {
           this.inventory.push({
             amount: 1,
-            ...pickedUpItem
+            ...pickedUpItem,
           });
         }
-      })
+      }),
     };
   }
   draw() {
@@ -301,7 +301,7 @@ export class Player {
         if (!found)
           this.inventory.push({
             ...createRock(),
-            amount: 1
+            amount: 1,
           });
       }
     } else this.moving = false;

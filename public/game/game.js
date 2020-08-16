@@ -15,7 +15,8 @@ import {
   gameCanvasY,
   mapSize,
   mapX,
-  mapY
+  mapY,
+  chatWindow,
 } from "./constants.js";
 import { mobs, drawMobs, updateMobs } from "./mobs/mob.js";
 import { spawners } from "./mobs/mobSpawners.js";
@@ -30,7 +31,7 @@ import {
   f,
   inventoryX,
   inventoryY,
-  customMenu
+  customMenu,
 } from "./globals.js";
 import { chatInput, activeInventoryTab } from "./utils/ui.js";
 import { mousePoint } from "./utils/input.js";
@@ -38,7 +39,7 @@ import { marginLeft, marginTop } from "./utils/canvas.js";
 import { contextMenu } from "./utils/contextMenu.js";
 import {
   drawDamageParticles,
-  updateDamageParticles
+  updateDamageParticles,
 } from "./effects/damageParticle.js";
 import { drawItems, items } from "./items/item.js";
 import { getTile } from "./utils/tile.js";
@@ -163,7 +164,7 @@ export let initGame = (slot, gameContinued) => {
       gameCanvas.width = screenSize;
       gameCanvas.height = screenSize;
     },
-    contextMenuCallback = e => {
+    contextMenuCallback = (e) => {
       e.preventDefault();
       let ratioW = frame.width / c.width,
         ratioH = frame.height / c.height,
@@ -188,7 +189,7 @@ export let initGame = (slot, gameContinued) => {
               x: mobs[i].position.x - offsetX,
               y: mobs[i].position.y - offsetY,
               width: tileSize,
-              height: tileSize
+              height: tileSize,
             })
           ) {
             optionCount++;
@@ -201,7 +202,7 @@ export let initGame = (slot, gameContinued) => {
               x: items[i].position.x - offsetX,
               y: items[i].position.y - offsetY,
               width: tileSize,
-              height: tileSize
+              height: tileSize,
             })
           ) {
             optionCount++;
@@ -243,7 +244,7 @@ export let initGame = (slot, gameContinued) => {
         4
       );
     },
-    drawLayer = data => {
+    drawLayer = (data) => {
       let imageSrc = assets["tiles"];
       let startX = Math.floor(localPlayer.position.x / 32) - halfOfTileCount,
         startY = Math.floor(localPlayer.position.y / 32) - halfOfTileCount;
@@ -287,7 +288,7 @@ export let initGame = (slot, gameContinued) => {
             x: inventoryX + (i % 2) * entryWidth + itemSize * 1.25,
             y: inventoryY + 20 + Math.floor(i / 2) * itemSize + itemSize - 30,
             width: f.measureText(localPlayer.inventory[i].name).width,
-            height: 20
+            height: 20,
           };
           if (Nasos.collidePR(mousePoint, textPos))
             f.fillStyle = "rgba(200,200,255,0.9)";
@@ -412,7 +413,7 @@ export let initGame = (slot, gameContinued) => {
   setupGameCanvas();
   setupEntities();
   load();
-  chatInput.addEventListener("keyup", function(e) {
+  chatInput.addEventListener("keyup", function (e) {
     if (e.keyCode == 13) {
       if (chatInput.value != "") {
         chatWindow.innerHTML =

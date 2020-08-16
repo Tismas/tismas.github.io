@@ -6,15 +6,15 @@ import { isInViewport } from "../utils/isInViewport.js";
 
 export let items = [];
 
-export const pickUpItem = entity => {
-  const pickedUpItem = items.find(item => {
-    const dx = Math.abs(item.position.x - entity.x) / 32;
-    const dy = Math.abs(item.position.y - entity.y) / 32;
+export const pickUpItem = (entity) => {
+  const pickedUpItem = items.find((item) => {
+    const dx = Math.abs(item.position.x - entity.position.x) / 32;
+    const dy = Math.abs(item.position.y - entity.position.y) / 32;
     return dx <= 1 && dy <= 1;
   });
 
   if (pickedUpItem) {
-    items = items.filter(item => item !== pickedUpItem);
+    items = items.filter((item) => item !== pickedUpItem);
   }
 
   return pickedUpItem;
@@ -43,7 +43,7 @@ const drawItem = (x, y, item) => {
 };
 
 export const drawItems = () => {
-  items.forEach(item => {
+  items.forEach((item) => {
     const x = item.position.x - offsetX;
     const y = item.position.y - offsetY;
     if (isInViewport(x, y)) {
